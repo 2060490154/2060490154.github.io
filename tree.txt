@@ -1,0 +1,90 @@
+文件夹 PATH 列表
+卷序列号为 83A0-7FC9
+F:.
+├─archetypes
+├─assets
+├─content
+│  └─post
+├─data
+├─i18n
+├─layouts
+├─public
+│  ├─about
+│  ├─categories
+│  │  └─page
+│  │      └─1
+│  ├─img
+│  ├─page
+│  │  └─1
+│  ├─post
+│  │  ├─page
+│  │  │  └─1
+│  │  ├─半导体知识
+│  │  └─博客
+│  ├─scss
+│  ├─tags
+│  │  └─page
+│  │      └─1
+│  └─ts
+├─resources
+│  └─_gen
+│      ├─assets
+│      │  └─scss
+│      └─images
+│          └─img
+├─static
+└─themes
+    └─hugo-theme-stack
+        ├─.devcontainer
+        ├─.github
+        │  └─ISSUE_TEMPLATE
+        ├─archetypes
+        ├─assets
+        │  ├─icons
+        │  ├─img
+        │  ├─scss
+        │  │  ├─external
+        │  │  └─partials
+        │  │      ├─comments
+        │  │      ├─highlight
+        │  │      └─layout
+        │  └─ts
+        ├─data
+        ├─exampleSite
+        │  └─content
+        │      ├─categories
+        │      │  └─Test
+        │      ├─page
+        │      │  ├─about
+        │      │  ├─archives
+        │      │  ├─links
+        │      │  └─search
+        │      └─post
+        │          ├─chinese-test
+        │          ├─emoji-support
+        │          ├─markdown-syntax
+        │          ├─math-typesetting
+        │          ├─placeholder-text
+        │          └─rich-content
+        ├─i18n
+        ├─images
+        └─layouts
+            ├─page
+            ├─partials
+            │  ├─article
+            │  │  └─components
+            │  ├─article-list
+            │  ├─comments
+            │  │  └─provider
+            │  ├─data
+            │  ├─footer
+            │  │  └─components
+            │  ├─head
+            │  │  └─opengraph
+            │  │      └─provider
+            │  ├─helper
+            │  ├─sidebar
+            │  └─widget
+            ├─shortcodes
+            └─_default
+                └─_markup
