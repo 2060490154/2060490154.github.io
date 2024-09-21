@@ -12,22 +12,7 @@
 <meta property='og:site_name' content='My New Hugo Site'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' />
 <meta name="twitter:title" content="为什么要建个博客">
-<meta name="twitter:description" content="过程\r其实很早的时候就有想建立博客的想法，因为自己平常也会有记日记的习惯，总想用一些文字或者图片来记录当下的时光，不管是快乐还是悲伤，总得在哪些地方留下点痕迹才好，用文字来还原那时候的心情那时候的经历，证明那段时光自己是有心去记忆的，等到许多年后看到自己当初所做的事，所说的话，可能也会会心一笑吧。\n利用hugo简单搭建\r当前的建站有很多种方式像是老牌的hexo，以及新的vue或者hugo，为了简单，和响应快些，于是选择hugo这种新型的静态网站部署方式。\n前提准备\r确保电脑中已安装git\n步骤\r首先使用winget下载hugo-extend，记住是增强版，为了让所选的主题可以正常运行。 $ winget install Hugo.Hugo.Extended\r$ hugo version #验证下是否正常安装 当初随便就下载了普通版结果到主题的文档中去看，需要下载增强版。等到我想要卸载的时候，以为uninstall后接的是它的id，结果winget识别不到这个包，最后直接用hugo才正常识别并卸载，原来卸载程序只认名称不认ID。 2. 下载好后利用hugo快速生成站点\n$ hugo new site /path/to/site site后跟着自己想设定的文件位置,在进入到site文件夹下，将主题git克隆到目录下，于是生成的文件目录如下：\n$ git clone https://github.com/CaiJimmy/hugo-theme-stack/ themes/hugo-theme-stack ├─archetypes\r├─assets\r├─content\r│ └─post\r├─data\r├─i18n\r├─layouts\r├─public\r│ ├─about\r│ ├─categories\r│ │ └─page\r│ │ └─1\r│ ├─img\r│ ├─page\r│ │ └─1\r│ ├─post\r│ │ ├─page\r│ │ │ └─1\r│ │ └─博客\r│ ├─scss\r│ ├─tags\r│ │ └─page\r│ │ └─1\r│ └─ts\r├─resources\r│ └─_gen\r│ ├─assets\r│ │ └─scss\r│ └─images\r│ └─img\r├─static\r└─themes\r└─hugo-theme-stack\r├─.devcontainer\r├─.github\r│ └─ISSUE_TEMPLATE\r├─archetypes\r├─assets\r│ ├─icons\r│ ├─img\r│ ├─scss\r│ │ ├─external\r│ │ └─partials\r│ │ ├─comments\r│ │ ├─highlight\r│ │ └─layout\r│ └─ts\r├─data\r├─exampleSite\r│ └─content\r│ ├─categories\r│ │ └─Test\r│ ├─page\r│ │ ├─about\r│ │ ├─archives\r│ │ ├─links\r│ │ └─search\r│ └─post\r│ ├─chinese-test\r│ ├─emoji-support\r│ ├─markdown-syntax\r│ ├─math-typesetting\r│ ├─placeholder-text\r│ └─rich-content\r├─i18n\r├─images\r└─layouts\r├─page\r├─partials\r│ ├─article\r│ │ └─components\r│ ├─article-list\r│ ├─comments\r│ │ └─provider\r│ ├─data\r│ ├─footer\r│ │ └─components\r│ ├─head\r│ │ └─opengraph\r│ │ └─provider\r│ ├─helper\r│ ├─sidebar\r│ └─widget\r├─shortcodes\r└─_default\r└─_markup 以下是各个文件夹的意义\n"><script>
-window.MathJax = {
-    tex: {
-      inlineMath: ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      processEscapes: true
-    },
-    svg: {
-      fontCache: 'global'
-    }
-};
-</script>
-<script type="text/javascript" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
-
+<meta name="twitter:description" content="过程\r其实很早的时候就有想建立博客的想法，因为自己平常也会有记日记的习惯，总想用一些文字或者图片来记录当下的时光，不管是快乐还是悲伤，总得在哪些地方留下点痕迹才好，用文字来还原那时候的心情那时候的经历，证明那段时光自己是有心去记忆的，等到许多年后看到自己当初所做的事，所说的话，可能也会会心一笑吧。\n利用hugo简单搭建\r当前的建站有很多种方式像是老牌的hexo，以及新的vue或者hugo，为了简单，和响应快些，于是选择hugo这种新型的静态网站部署方式。\n前提准备\r确保电脑中已安装git\n步骤\r首先使用winget下载hugo-extend，记住是增强版，为了让所选的主题可以正常运行。 $ winget install Hugo.Hugo.Extended\r$ hugo version #验证下是否正常安装 当初随便就下载了普通版结果到主题的文档中去看，需要下载增强版。等到我想要卸载的时候，以为uninstall后接的是它的id，结果winget识别不到这个包，最后直接用hugo才正常识别并卸载，原来卸载程序只认名称不认ID。 2. 下载好后利用hugo快速生成站点\n$ hugo new site /path/to/site site后跟着自己想设定的文件位置,在进入到site文件夹下，将主题git克隆到目录下，于是生成的文件目录如下：\n$ git clone https://github.com/CaiJimmy/hugo-theme-stack/ themes/hugo-theme-stack ├─archetypes\r├─assets\r├─content\r│ └─post\r├─data\r├─i18n\r├─layouts\r├─public\r│ ├─about\r│ ├─categories\r│ │ └─page\r│ │ └─1\r│ ├─img\r│ ├─page\r│ │ └─1\r│ ├─post\r│ │ ├─page\r│ │ │ └─1\r│ │ └─博客\r│ ├─scss\r│ ├─tags\r│ │ └─page\r│ │ └─1\r│ └─ts\r├─resources\r│ └─_gen\r│ ├─assets\r│ │ └─scss\r│ └─images\r│ └─img\r├─static\r└─themes\r└─hugo-theme-stack\r├─.devcontainer\r├─.github\r│ └─ISSUE_TEMPLATE\r├─archetypes\r├─assets\r│ ├─icons\r│ ├─img\r│ ├─scss\r│ │ ├─external\r│ │ └─partials\r│ │ ├─comments\r│ │ ├─highlight\r│ │ └─layout\r│ └─ts\r├─data\r├─exampleSite\r│ └─content\r│ ├─categories\r│ │ └─Test\r│ ├─page\r│ │ ├─about\r│ │ ├─archives\r│ │ ├─links\r│ │ └─search\r│ └─post\r│ ├─chinese-test\r│ ├─emoji-support\r│ ├─markdown-syntax\r│ ├─math-typesetting\r│ ├─placeholder-text\r│ └─rich-content\r├─i18n\r├─images\r└─layouts\r├─page\r├─partials\r│ ├─article\r│ │ └─components\r│ ├─article-list\r│ ├─comments\r│ │ └─provider\r│ ├─data\r│ ├─footer\r│ │ └─components\r│ ├─head\r│ │ └─opengraph\r│ │ └─provider\r│ ├─helper\r│ ├─sidebar\r│ └─widget\r├─shortcodes\r└─_default\r└─_markup 以下是各个文件夹的意义\n">
     </head>
     <body class="
     article-page
@@ -323,7 +308,7 @@ $ hugo version #验证下是否正常安装
 </h3><p>选用的主题是<a class="link" href="https://stack.jimmycai.com/"  target="_blank" rel="noopener"
     >stack</a>,这个主题的star数还是挺多的，比起著名的papermod更新更加频繁些，前者已经有段时间没有更新了，于是就选用了这个主题。</p>
 <h3 id="博客文件开头">博客文件开头
-</h3><p>记住在每段博客的开头添加</p>
+</h3><p>记住在每段博客的开头添加以下代码</p>
 <pre tabindex="0"><code>+++
 title = &#39;First&#39;
 date = 2024-09-21T10:36:14+08:00
@@ -359,8 +344,9 @@ draft = true #设定允不允许hugo将文章公开发布
 </span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">math</span> = <span style="color:#66d9ef">true</span>
 </span></span></code></pre></div><p>测试：
 </p>
-$$N_\mathrm{D}=\frac{\varepsilon_\mathrm{S}{E_{\mathrm{C}}^{2}}}{2qBV}$$<h2 id="网站部署到github">网站部署到github
-</h2>
+$$N_\mathrm{D}=\frac{\varepsilon_\mathrm{S}{E_{\mathrm{C}}^{2}}}{2qBV}$$<h2 id="网站部署到github由于不知道怎么去除分支保护导致耽搁了好久">网站部署到github（由于不知道怎么去除分支保护导致耽搁了好久
+</h2><p>部署分支一定要到main上，不然由分支于保护，无法部署到GitHub actions上</p>
+
 </section>
 
 
