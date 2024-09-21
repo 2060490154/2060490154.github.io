@@ -4,6 +4,10 @@ title = 'My New Hugo Site'
 
 
 
+	
+
+theme = "stack"
+
 [markup]
   [markup.goldmark]
     [markup.goldmark.extensions]
