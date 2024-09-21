@@ -6,7 +6,7 @@ title = 'My New Hugo Site'
 
 	
 
-theme = "stack"
+theme = "hugo-theme-stack"
 
 [markup]
   [markup.goldmark]
