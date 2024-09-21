@@ -21,9 +21,17 @@
 &lt;/h2&gt;</description>
         </item>
         <item>
+        <title>AboutME</title>
+        <link>http://localhost:1313/about/</link>
+        <pubDate>Sat, 21 Sep 2024 10:35:27 +0800</pubDate>
+        
+        <guid>http://localhost:1313/about/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>希腊字母表</title>
         <link>http://localhost:1313/post/%E5%B8%8C%E8%85%8A%E5%AD%97%E6%AF%8D%E8%A1%A8/</link>
-        <pubDate>Sat, 21 Sep 2024 10:36:14 +0800</pubDate>
+        <pubDate>Wed, 11 Sep 2024 00:00:00 +0000</pubDate>
         
         <guid>http://localhost:1313/post/%E5%B8%8C%E8%85%8A%E5%AD%97%E6%AF%8D%E8%A1%A8/</guid>
         <description>&lt;p&gt;以下是包含大小写希腊字母及其 LaTeX 表达式的统一表格，并包含不同形式的 \(\epsilon\)、\(\phi\)：&lt;/p&gt;
@@ -180,14 +188,6 @@
 &lt;li&gt;大写字母如 Α (Alpha)、Β (Beta) 等与拉丁字母形式相同时，直接使用拉丁字母即可。&lt;/li&gt;
 &lt;/ul&gt;
 </description>
-        </item>
-        <item>
-        <title>AboutME</title>
-        <link>http://localhost:1313/about/</link>
-        <pubDate>Sat, 21 Sep 2024 10:35:27 +0800</pubDate>
-        
-        <guid>http://localhost:1313/about/</guid>
-        <description></description>
         </item>
         <item>
         <title>power</title>
