@@ -1,162 +1,308 @@
-<!DOCTYPE html>
-<html lang="en-us" dir="ltr">
-    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="introduction\r损耗计算公式 $$ P_\\mathrm{L}(\\mathrm{on})=\\delta I_\\mathrm{F}V_\\mathrm{F} $$ power dissation\n饱和区漏极电流与栅极电压的关系 $$ I_{D,sat}\\propto(V_{GS}-V_{th})^2 $$ 由于饱和区收到沟道宽度调制影响，不仅收栅极电压还受到漏源电压$V_{DS}$ 的影响，所有削弱平方关系，使漏电流线性增长。\n双极性在工作时，少数载流子在起作用。其由三个部分构成，发射区（emmiter），基区（Base)和集电区（collector),NPN型晶体管工作时，发射极基极正偏，发射区多数载流子进入基区，成为基区中的少数载流子，紧接着在基区扩散到集电区中，由于基区很薄不会复合。基极集电极反偏，少数载流子迅速被集电区收集形成电流。\n当其切换到阻断状态时时必须把少数载流子移除，主要通过门极驱动电流和空穴电子对复合，在此过程造成大量的功率损耗，降低效率。\n因此倾向于单极性器件，典型的是肖特基整流管，通过金属半导体界面对电流进行整流。通常肖特基i二极管的阻断电压只能到100V超过后会增大导通压降，但SiC肖特基二极管可以实现高的击穿电压和低的导通压降，低的漂移区电阻，优秀的开关特性。 u-mosfet即垂直型mosfet通过消除jfet区减少电阻\nGTO以及双极性晶体管需要很大的电流驱动以及减震电路来减少暂态过电压过大。于是提出mos双极性结构IGBT。 具有四层晶闸管 mos-control-thyristor 通过使四层晶闸管结构闭锁实现较低的导通压降。通过给mos的栅极施加正电压，激发mosfet导通，使阳极和阴极之间产生电流，启动晶闸管的自保留模式，晶闸管的少数载流子注入机制使电流迅速增大，从而保持导通状态，MCT进入低导通电阻状态。通过关闭晶闸管的正反馈效应来关闭MCT，栅极施加负电压驱动另一个MOSFET，使其在\\(N_+\\)发射极和p基区之间形成一个电流分流通道，这个通道使载流子流向栅极，减少关键PN结处的载流子流动，降低了NPN晶体管的电流增益，切断晶闸管的少数载流子流动，PNPN结构中的少数载流子被迅速抽出，使晶闸管失去正反馈效应，终止导通状态，晶闸管转换为高阻状态，MCT进入关断状态。 提出基极电阻控制晶闸管：BRT分流区相邻四层晶闸管结构 1.6\r理想的drift区域假设为两边的惨杂浓度都是一致的，忽略结的曲率影响。泊松方程解出电场按三角形分布，其中单位面积电阻为 $$ R_\\mathrm{on.sp}=\\left(\\frac{W_\\mathrm{D}}{q\\mu_\\mathrm{n}N_\\mathrm{D}}\\right) $$ 耗尽层宽度depletion width $$ W_\\mathrm{D}=\\frac{2BV}{E_\\mathrm{C}} $$ 达到目标耐压需要的惨杂浓度 $$N_\\mathrm{D}=\\frac{\\varepsilon_\\mathrm{S}{E_{\\mathrm{C}}^{2}}}{2qBV}$$ 结合后理想漂移区的单位面积电阻 $$ R_{\\mathrm{on-ideal}}=\\frac{4BV^{2}}{\\varepsilon_{S}\\mu_\\mathrm{n}E_\\mathrm{C}^{3}}$$GaAs由于电子迁移率高，而SiC由于禁带宽度大导致两者的导通电阻很小。\n1.7\r临界击穿电压下的电荷密度公式 $$ Q_\\mathrm{optimum}=2qN_\\mathrm{D}W_\\mathrm{N}=\\epsilon_\\mathrm{S}E_\\mathrm{C} $$ 在电荷耦合结构下的导通电阻： $$ R_\\mathrm{D,sp}=\\rho_\\mathrm{D}\\left(\\frac{p}{W_\\mathrm{N}}\\right)t $$ 结合电阻率与惨杂浓度的关系 $$ \\rho=\\frac{1}{q\\cdot(n\\cdot\\mu_\\mathrm{n}+p\\cdot\\mu_\\mathrm{p})}$$ 得到 $$ R_\\mathrm{D,sp}=\\frac{tp}{q\\mu_\\mathrm{N}N_\\mathrm{D}W_\\mathrm{N}}$$ 结合临界电荷得 $$ R_\\mathrm{D,sp}=\\frac{2tp}{\\mu_\\mathrm{N}Q_\\mathrm{optimum}}$$">
-<title>power</title>
+<!doctype html>
 
-<link rel='canonical' href='http://localhost:1313/post/power-semiconductor/'>
 
-<link rel="stylesheet" href="/scss/style.min.b9c8156d464c343bdacaf14a871581fb94cbbdb9dd5cbce4ba017361187cc930.css"><meta property='og:title' content="power">
-<meta property='og:description' content="introduction\r损耗计算公式 $$ P_\\mathrm{L}(\\mathrm{on})=\\delta I_\\mathrm{F}V_\\mathrm{F} $$ power dissation\n饱和区漏极电流与栅极电压的关系 $$ I_{D,sat}\\propto(V_{GS}-V_{th})^2 $$ 由于饱和区收到沟道宽度调制影响，不仅收栅极电压还受到漏源电压$V_{DS}$ 的影响，所有削弱平方关系，使漏电流线性增长。\n双极性在工作时，少数载流子在起作用。其由三个部分构成，发射区（emmiter），基区（Base)和集电区（collector),NPN型晶体管工作时，发射极基极正偏，发射区多数载流子进入基区，成为基区中的少数载流子，紧接着在基区扩散到集电区中，由于基区很薄不会复合。基极集电极反偏，少数载流子迅速被集电区收集形成电流。\n当其切换到阻断状态时时必须把少数载流子移除，主要通过门极驱动电流和空穴电子对复合，在此过程造成大量的功率损耗，降低效率。\n因此倾向于单极性器件，典型的是肖特基整流管，通过金属半导体界面对电流进行整流。通常肖特基i二极管的阻断电压只能到100V超过后会增大导通压降，但SiC肖特基二极管可以实现高的击穿电压和低的导通压降，低的漂移区电阻，优秀的开关特性。 u-mosfet即垂直型mosfet通过消除jfet区减少电阻\nGTO以及双极性晶体管需要很大的电流驱动以及减震电路来减少暂态过电压过大。于是提出mos双极性结构IGBT。 具有四层晶闸管 mos-control-thyristor 通过使四层晶闸管结构闭锁实现较低的导通压降。通过给mos的栅极施加正电压，激发mosfet导通，使阳极和阴极之间产生电流，启动晶闸管的自保留模式，晶闸管的少数载流子注入机制使电流迅速增大，从而保持导通状态，MCT进入低导通电阻状态。通过关闭晶闸管的正反馈效应来关闭MCT，栅极施加负电压驱动另一个MOSFET，使其在\\(N_+\\)发射极和p基区之间形成一个电流分流通道，这个通道使载流子流向栅极，减少关键PN结处的载流子流动，降低了NPN晶体管的电流增益，切断晶闸管的少数载流子流动，PNPN结构中的少数载流子被迅速抽出，使晶闸管失去正反馈效应，终止导通状态，晶闸管转换为高阻状态，MCT进入关断状态。 提出基极电阻控制晶闸管：BRT分流区相邻四层晶闸管结构 1.6\r理想的drift区域假设为两边的惨杂浓度都是一致的，忽略结的曲率影响。泊松方程解出电场按三角形分布，其中单位面积电阻为 $$ R_\\mathrm{on.sp}=\\left(\\frac{W_\\mathrm{D}}{q\\mu_\\mathrm{n}N_\\mathrm{D}}\\right) $$ 耗尽层宽度depletion width $$ W_\\mathrm{D}=\\frac{2BV}{E_\\mathrm{C}} $$ 达到目标耐压需要的惨杂浓度 $$N_\\mathrm{D}=\\frac{\\varepsilon_\\mathrm{S}{E_{\\mathrm{C}}^{2}}}{2qBV}$$ 结合后理想漂移区的单位面积电阻 $$ R_{\\mathrm{on-ideal}}=\\frac{4BV^{2}}{\\varepsilon_{S}\\mu_\\mathrm{n}E_\\mathrm{C}^{3}}$$GaAs由于电子迁移率高，而SiC由于禁带宽度大导致两者的导通电阻很小。\n1.7\r临界击穿电压下的电荷密度公式 $$ Q_\\mathrm{optimum}=2qN_\\mathrm{D}W_\\mathrm{N}=\\epsilon_\\mathrm{S}E_\\mathrm{C} $$ 在电荷耦合结构下的导通电阻： $$ R_\\mathrm{D,sp}=\\rho_\\mathrm{D}\\left(\\frac{p}{W_\\mathrm{N}}\\right)t $$ 结合电阻率与惨杂浓度的关系 $$ \\rho=\\frac{1}{q\\cdot(n\\cdot\\mu_\\mathrm{n}+p\\cdot\\mu_\\mathrm{p})}$$ 得到 $$ R_\\mathrm{D,sp}=\\frac{tp}{q\\mu_\\mathrm{N}N_\\mathrm{D}W_\\mathrm{N}}$$ 结合临界电荷得 $$ R_\\mathrm{D,sp}=\\frac{2tp}{\\mu_\\mathrm{N}Q_\\mathrm{optimum}}$$">
-<meta property='og:url' content='http://localhost:1313/post/power-semiconductor/'>
-<meta property='og:site_name' content='My New Hugo Site'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' />
-<meta name="twitter:title" content="power">
-<meta name="twitter:description" content="introduction\r损耗计算公式 $$ P_\\mathrm{L}(\\mathrm{on})=\\delta I_\\mathrm{F}V_\\mathrm{F} $$ power dissation\n饱和区漏极电流与栅极电压的关系 $$ I_{D,sat}\\propto(V_{GS}-V_{th})^2 $$ 由于饱和区收到沟道宽度调制影响，不仅收栅极电压还受到漏源电压$V_{DS}$ 的影响，所有削弱平方关系，使漏电流线性增长。\n双极性在工作时，少数载流子在起作用。其由三个部分构成，发射区（emmiter），基区（Base)和集电区（collector),NPN型晶体管工作时，发射极基极正偏，发射区多数载流子进入基区，成为基区中的少数载流子，紧接着在基区扩散到集电区中，由于基区很薄不会复合。基极集电极反偏，少数载流子迅速被集电区收集形成电流。\n当其切换到阻断状态时时必须把少数载流子移除，主要通过门极驱动电流和空穴电子对复合，在此过程造成大量的功率损耗，降低效率。\n因此倾向于单极性器件，典型的是肖特基整流管，通过金属半导体界面对电流进行整流。通常肖特基i二极管的阻断电压只能到100V超过后会增大导通压降，但SiC肖特基二极管可以实现高的击穿电压和低的导通压降，低的漂移区电阻，优秀的开关特性。 u-mosfet即垂直型mosfet通过消除jfet区减少电阻\nGTO以及双极性晶体管需要很大的电流驱动以及减震电路来减少暂态过电压过大。于是提出mos双极性结构IGBT。 具有四层晶闸管 mos-control-thyristor 通过使四层晶闸管结构闭锁实现较低的导通压降。通过给mos的栅极施加正电压，激发mosfet导通，使阳极和阴极之间产生电流，启动晶闸管的自保留模式，晶闸管的少数载流子注入机制使电流迅速增大，从而保持导通状态，MCT进入低导通电阻状态。通过关闭晶闸管的正反馈效应来关闭MCT，栅极施加负电压驱动另一个MOSFET，使其在\\(N_+\\)发射极和p基区之间形成一个电流分流通道，这个通道使载流子流向栅极，减少关键PN结处的载流子流动，降低了NPN晶体管的电流增益，切断晶闸管的少数载流子流动，PNPN结构中的少数载流子被迅速抽出，使晶闸管失去正反馈效应，终止导通状态，晶闸管转换为高阻状态，MCT进入关断状态。 提出基极电阻控制晶闸管：BRT分流区相邻四层晶闸管结构 1.6\r理想的drift区域假设为两边的惨杂浓度都是一致的，忽略结的曲率影响。泊松方程解出电场按三角形分布，其中单位面积电阻为 $$ R_\\mathrm{on.sp}=\\left(\\frac{W_\\mathrm{D}}{q\\mu_\\mathrm{n}N_\\mathrm{D}}\\right) $$ 耗尽层宽度depletion width $$ W_\\mathrm{D}=\\frac{2BV}{E_\\mathrm{C}} $$ 达到目标耐压需要的惨杂浓度 $$N_\\mathrm{D}=\\frac{\\varepsilon_\\mathrm{S}{E_{\\mathrm{C}}^{2}}}{2qBV}$$ 结合后理想漂移区的单位面积电阻 $$ R_{\\mathrm{on-ideal}}=\\frac{4BV^{2}}{\\varepsilon_{S}\\mu_\\mathrm{n}E_\\mathrm{C}^{3}}$$GaAs由于电子迁移率高，而SiC由于禁带宽度大导致两者的导通电阻很小。\n1.7\r临界击穿电压下的电荷密度公式 $$ Q_\\mathrm{optimum}=2qN_\\mathrm{D}W_\\mathrm{N}=\\epsilon_\\mathrm{S}E_\\mathrm{C} $$ 在电荷耦合结构下的导通电阻： $$ R_\\mathrm{D,sp}=\\rho_\\mathrm{D}\\left(\\frac{p}{W_\\mathrm{N}}\\right)t $$ 结合电阻率与惨杂浓度的关系 $$ \\rho=\\frac{1}{q\\cdot(n\\cdot\\mu_\\mathrm{n}+p\\cdot\\mu_\\mathrm{p})}$$ 得到 $$ R_\\mathrm{D,sp}=\\frac{tp}{q\\mu_\\mathrm{N}N_\\mathrm{D}W_\\mathrm{N}}$$ 结合临界电荷得 $$ R_\\mathrm{D,sp}=\\frac{2tp}{\\mu_\\mathrm{N}Q_\\mathrm{optimum}}$$">
-    </head>
-    <body class="
-    article-page
-    ">
-    <script>
-        (function() {
-            const colorSchemeKey = 'StackColorScheme';
-            if(!localStorage.getItem(colorSchemeKey)){
-                localStorage.setItem(colorSchemeKey, "auto");
-            }
-        })();
-    </script><script>
-    (function() {
-        const colorSchemeKey = 'StackColorScheme';
-        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
-        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
 
-        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
-            
 
-            document.documentElement.dataset.scheme = 'dark';
-        } else {
-            document.documentElement.dataset.scheme = 'light';
-        }
-    })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html
+  class="not-ready lg:text-base"
+  style="--bg: #faf8f1"
+  lang="en-us"
+  dir="ltr"
+>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+  />
+
+  
+  <title>power - My New Hugo Site</title>
+
+  
+  <meta name="theme-color" />
+
+  
+  
+  
+  
+  <meta name="description" content="introduction
+损耗计算公式
+
+$$ P_\mathrm{L}(\mathrm{on})=\delta I_\mathrm{F}V_\mathrm{F} $$
+power dissation
+饱和区漏极电流与栅极电压的关系
+
+$$ I_{D,sat}\propto(V_{GS}-V_{th})^2 $$
+由于饱和区收到沟道宽度调制影响，不仅收栅极电压还受到漏源电压$V_{DS}$ 的影响，所有削弱平方关系，使漏电流线性增长。
+双极性在工作时，少数载流子在起作用。其由三个部分构成，发射区（emmiter），基区（Base)和集电区（collector),NPN型晶体管工作时，发射极基极正偏，发射区多数载流子进入基区，成为基区中的少数载流子，紧接着在基区扩散到集电区中，由于基区很薄不会复合。基极集电极反偏，少数载流子迅速被集电区收集形成电流。
+当其切换到阻断状态时时必须把少数载流子移除，主要通过门极驱动电流和空穴电子对复合，在此过程造成大量的功率损耗，降低效率。
+因此倾向于单极性器件，典型的是肖特基整流管，通过金属半导体界面对电流进行整流。通常肖特基i二极管的阻断电压只能到100V超过后会增大导通压降，但SiC肖特基二极管可以实现高的击穿电压和低的导通压降，低的漂移区电阻，优秀的开关特性。
+
+u-mosfet即垂直型mosfet通过消除jfet区减少电阻
+GTO以及双极性晶体管需要很大的电流驱动以及减震电路来减少暂态过电压过大。于是提出mos双极性结构IGBT。
+
+
+具有四层晶闸管
+mos-control-thyristor
+
+通过使四层晶闸管结构闭锁实现较低的导通压降。通过给mos的栅极施加正电压，激发mosfet导通，使阳极和阴极之间产生电流，启动晶闸管的自保留模式，晶闸管的少数载流子注入机制使电流迅速增大，从而保持导通状态，MCT进入低导通电阻状态。通过关闭晶闸管的正反馈效应来关闭MCT，栅极施加负电压驱动另一个MOSFET，使其在\(N_&#43;\)发射极和p基区之间形成一个电流分流通道，这个通道使载流子流向栅极，减少关键PN结处的载流子流动，降低了NPN晶体管的电流增益，切断晶闸管的少数载流子流动，PNPN结构中的少数载流子被迅速抽出，使晶闸管失去正反馈效应，终止导通状态，晶闸管转换为高阻状态，MCT进入关断状态。
+提出基极电阻控制晶闸管：BRT分流区相邻四层晶闸管结构
+
+1.6
+理想的drift区域假设为两边的惨杂浓度都是一致的，忽略结的曲率影响。泊松方程解出电场按三角形分布，其中单位面积电阻为
+
+$$ R_\mathrm{on.sp}=\left(\frac{W_\mathrm{D}}{q\mu_\mathrm{n}N_\mathrm{D}}\right) $$
+耗尽层宽度depletion width
+
+$$ W_\mathrm{D}=\frac{2BV}{E_\mathrm{C}} $$
+达到目标耐压需要的惨杂浓度
+
+$$N_\mathrm{D}=\frac{\varepsilon_\mathrm{S}{E_{\mathrm{C}}^{2}}}{2qBV}$$
+结合后理想漂移区的单位面积电阻
+
+$$ R_{\mathrm{on-ideal}}=\frac{4BV^{2}}{\varepsilon_{S}\mu_\mathrm{n}E_\mathrm{C}^{3}}$$GaAs由于电子迁移率高，而SiC由于禁带宽度大导致两者的导通电阻很小。
+1.7
+临界击穿电压下的电荷密度公式
+
+$$ Q_\mathrm{optimum}=2qN_\mathrm{D}W_\mathrm{N}=\epsilon_\mathrm{S}E_\mathrm{C} $$
+在电荷耦合结构下的导通电阻：
+
+$$ R_\mathrm{D,sp}=\rho_\mathrm{D}\left(\frac{p}{W_\mathrm{N}}\right)t $$
+结合电阻率与惨杂浓度的关系
+
+$$ \rho=\frac{1}{q\cdot(n\cdot\mu_\mathrm{n}&#43;p\cdot\mu_\mathrm{p})}$$
+得到
+
+$$ R_\mathrm{D,sp}=\frac{tp}{q\mu_\mathrm{N}N_\mathrm{D}W_\mathrm{N}}$$
+结合临界电荷得
+
+$$ R_\mathrm{D,sp}=\frac{2tp}{\mu_\mathrm{N}Q_\mathrm{optimum}}$$" />
+  <meta name="author" content="My New Hugo Site" />
+  
+
+  
+  
+  
+  
+  
+  
+  <link rel="preload stylesheet" as="style" href="http://localhost:1313/main.min.css" />
+
+  
+  
+  
+  
+  
+  <link rel="preload" as="image" href="http://localhost:1313/theme.png" />
+
+  
+  
+  
+  
+  
+
+  
+  
+  
+
+  
+  
+  <script
+    defer
+    src="http://localhost:1313/highlight.min.js"
+    onload="hljs.initHighlightingOnLoad();"
+  ></script>
+  
+
+  
+  
+  
+  
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css"
+  integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI"
+  crossorigin="anonymous"
+/>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js"
+  integrity="sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t"
+  crossorigin="anonymous"
+></script>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js"
+  integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05"
+  crossorigin="anonymous"
+></script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () =>
+    renderMathInElement(document.body, {
+      
+      
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+      ],
+      
+      throwOnError: false,
+    }),
+  );
 </script>
-<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
-        <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-        </span>
-    </button>
 
-    <header>
-        
-            
-            <figure class="site-avatar">
-                <a href="/">
-                
-                    
-                    
-                    
-                        
-                        <img src="/img/avatar_hu13739649187745961479.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
-                    
-                
-                </a>
-                
-            </figure>
-            
-        
-        
-        <div class="site-meta">
-            <h1 class="site-name"><a href="/">My New Hugo Site</a></h1>
-            <h2 class="site-description"></h2>
-        </div>
-    </header><ol class="menu" id="main-menu">
-        
-        
-        <li class="menu-bottom-section">
-            <ol class="menu">
+  
+  
+  
 
-                
-                    <li id="dark-mode-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="8" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
+  
+  <link
+    rel="icon"
+    href="http://localhost:1313/favicon.ico"
+  />
+  <link
+    rel="apple-touch-icon"
+    href="http://localhost:1313/apple-touch-icon.png"
+  />
 
+  
+  <meta name="generator" content="Hugo 0.134.2">
 
+  
+  
+  
+</head>
 
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="16" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
+  <body class="text-black duration-200 ease-out dark:text-white">
+    <header class="mx-auto flex h-[4.5rem] max-w-[--w] px-8 lg:justify-center">
+  <div class="relative z-50 ltr:mr-auto rtl:ml-auto flex items-center">
+    <a class="-translate-y-[1px] text-2xl font-medium" href="http://localhost:1313/"
+      >My New Hugo Site</a
+    >
+    <div
+      class="btn-dark text-[0] ltr:ml-4 rtl:mr-4 h-6 w-6 shrink-0 cursor-pointer [background:url(./theme.png)_left_center/_auto_theme('spacing.6')_no-repeat] [transition:_background-position_0.4s_steps(5)] dark:[background-position:right]"
+      role="button"
+      aria-label="Dark"
+    ></div>
+  </div>
 
+  <div
+    class="btn-menu relative z-50 ltr:-mr-8 rtl:-ml-8 flex h-[4.5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden"
+    role="button"
+    aria-label="Menu"
+  ></div>
 
+  
 
-                        <span>Dark Mode</span>
-                    </li>
-                
-            </ol>
-        </li>
-    </ol>
-</aside>
+  <script>
+    
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => {
+      htmlClass.remove('not-ready');
+    }, 10);
 
     
-
-            <main class="main full-width">
-    <article class="main-article">
-    <header class="article-header">
-
-    <div class="article-details">
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/post/power-semiconductor/">power</a>
-        </h2>
-    
-        
-    </div>
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
 
     
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const lightBg = '#faf8f1'.replace(/"/g, '');
+    const setDark = (isDark) => {
+      metaTheme.setAttribute('content', isDark ? '#000' : lightBg);
+      htmlClass[isDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', isDark);
+    };
+
     
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    if (htmlClass.contains('dark')) {
+      setDark(true);
+    } else {
+      const darkVal = localStorage.getItem('dark');
+      setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+    }
+
     
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
     
-    <footer class="article-time">
-        
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+  </script>
 
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <polyline points="12 7 12 12 15 15" />
-</svg>
-
-
-
-                <time class="article-time--reading">
-                    1 minute read
-                </time>
-            </div>
-        
-    </footer>
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full select-none flex-col justify-center pb-16 duration-200 dark:bg-black lg:static lg:h-auto lg:flex-row lg:!bg-transparent lg:pb-0 lg:transition-none"
+  >
+    
     
 
     
-</div>
-
+  </div>
 </header>
 
-    <section class="article-content">
+
+    <main
+      class="prose prose-neutral relative mx-auto min-h-[calc(100%-9rem)] max-w-[--w] px-8 pb-16 pt-14 dark:prose-invert"
+    >
+      
+
+<article>
+  <header class="mb-14">
+    <h1 class="!my-0 pb-2.5">power</h1>
+
     
+    <div class="text-xs antialiased opacity-60">
+      
+      
+      
+      
+    </div>
     
-    <h1 id="introduction">introduction
-</h1><p>损耗计算公式
+  </header>
+
+  <section><h1 id="introduction">introduction</h1>
+<p>损耗计算公式
 </p>
 $$ P_\mathrm{L}(\mathrm{on})=\delta I_\mathrm{F}V_\mathrm{F} $$<p>
-<a class="link" href="picture/%e6%8d%9f%e8%80%97.png" >power dissation</a></p>
+<a href="picture/%E6%8D%9F%E8%80%97.png">power dissation</a></p>
 <p>饱和区漏极电流与栅极电压的关系
 </p>
 $$ I_{D,sat}\propto(V_{GS}-V_{th})^2 $$<p>
@@ -164,64 +310,19 @@ $$ I_{D,sat}\propto(V_{GS}-V_{th})^2 $$<p>
 <p>双极性在工作时，少数载流子在起作用。其由三个部分构成，发射区（emmiter），基区（Base)和集电区（collector),NPN型晶体管工作时，发射极基极正偏，发射区多数载流子进入基区，成为基区中的少数载流子，紧接着在基区扩散到集电区中，由于基区很薄不会复合。基极集电极反偏，少数载流子迅速被集电区收集形成电流。<br>
 当其切换到阻断状态时时必须把少数载流子移除，主要通过门极驱动电流和空穴电子对复合，在此过程造成大量的功率损耗，降低效率。<br>
 因此倾向于单极性器件，典型的是肖特基整流管，通过金属半导体界面对电流进行整流。通常肖特基i二极管的阻断电压只能到100V超过后会增大导通压降，但SiC肖特基二极管可以实现高的击穿电压和低的导通压降，低的漂移区电阻，优秀的开关特性。
-<img src="/picture/Schottky-rectifier-structure.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="schottky"
-	
-	
->
+<img src="picture/Schottky-rectifier-structure.png" alt="schottky">
 u-mosfet即垂直型mosfet通过消除jfet区减少电阻<br>
 GTO以及双极性晶体管需要很大的电流驱动以及减震电路来减少暂态过电压过大。于是提出mos双极性结构IGBT。
-<img src="/picture/GTO.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="GTO"
-	
-	
->
-<img src="/picture/UMOS-IGBT.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="UMOS-IGBT"
-	
-	
->
+<img src="picture/GTO.png" alt="GTO">
+<img src="picture/UMOS-IGBT.png" alt="UMOS-IGBT">
 具有四层晶闸管
 mos-control-thyristor
-<img src="/picture/MCT.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="MCT"
-	
-	
->
+<img src="picture/MCT.png" alt="MCT">
 通过使四层晶闸管结构闭锁实现较低的导通压降。通过给mos的栅极施加正电压，激发mosfet导通，使阳极和阴极之间产生电流，启动晶闸管的自保留模式，晶闸管的少数载流子注入机制使电流迅速增大，从而保持导通状态，MCT进入低导通电阻状态。通过关闭晶闸管的正反馈效应来关闭MCT，栅极施加负电压驱动另一个MOSFET，使其在\(N_+\)发射极和p基区之间形成一个电流分流通道，这个通道使载流子流向栅极，减少关键PN结处的载流子流动，降低了NPN晶体管的电流增益，切断晶闸管的少数载流子流动，PNPN结构中的少数载流子被迅速抽出，使晶闸管失去正反馈效应，终止导通状态，晶闸管转换为高阻状态，MCT进入关断状态。
 提出基极电阻控制晶闸管：BRT分流区相邻四层晶闸管结构
-<img src="/picture/BRT.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="BRT"
-	
-	
-></p>
-<h3 id="16">1.6
-</h3><p>理想的drift区域假设为两边的惨杂浓度都是一致的，忽略结的曲率影响。泊松方程解出电场按三角形分布，其中单位面积电阻为
+<img src="picture/BRT.png" alt="BRT"></p>
+<h3 id="16">1.6</h3>
+<p>理想的drift区域假设为两边的惨杂浓度都是一致的，忽略结的曲率影响。泊松方程解出电场按三角形分布，其中单位面积电阻为
 </p>
 $$ R_\mathrm{on.sp}=\left(\frac{W_\mathrm{D}}{q\mu_\mathrm{n}N_\mathrm{D}}\right) $$<p>
 耗尽层宽度depletion width
@@ -233,8 +334,8 @@ $$N_\mathrm{D}=\frac{\varepsilon_\mathrm{S}{E_{\mathrm{C}}^{2}}}{2qBV}$$<p>
 结合后理想漂移区的单位面积电阻
 </p>
 $$ R_{\mathrm{on-ideal}}=\frac{4BV^{2}}{\varepsilon_{S}\mu_\mathrm{n}E_\mathrm{C}^{3}}$$<p>GaAs由于电子迁移率高，而SiC由于禁带宽度大导致两者的导通电阻很小。</p>
-<h3 id="17">1.7
-</h3><p>临界击穿电压下的电荷密度公式
+<h3 id="17">1.7</h3>
+<p>临界击穿电压下的电荷密度公式
 </p>
 $$ Q_\mathrm{optimum}=2qN_\mathrm{D}W_\mathrm{N}=\epsilon_\mathrm{S}E_\mathrm{C} $$<p>
 在电荷耦合结构下的导通电阻：
@@ -248,138 +349,67 @@ $$ \rho=\frac{1}{q\cdot(n\cdot\mu_\mathrm{n}+p\cdot\mu_\mathrm{p})}$$<p>
 $$ R_\mathrm{D,sp}=\frac{tp}{q\mu_\mathrm{N}N_\mathrm{D}W_\mathrm{N}}$$<p>
 结合临界电荷得
 </p>
-$$ R_\mathrm{D,sp}=\frac{2tp}{\mu_\mathrm{N}Q_\mathrm{optimum}}$$
-</section>
+$$ R_\mathrm{D,sp}=\frac{2tp}{\mu_\mathrm{N}Q_\mathrm{optimum}}$$</section>
 
+  
+  
 
-    <footer class="article-footer">
+  
+  
+  
+  
+  <nav
+    class="mt-24 flex overflow-hidden rounded-xl bg-black/[3%] text-lg !leading-[1.2] *:flex *:w-1/2 *:items-center *:p-5 *:font-medium *:no-underline dark:bg-white/[8%] [&>*:hover]:bg-black/[2%] dark:[&>*:hover]:bg-white/[3%]"
+  >
     
-
-    </footer>
-
-
+    <a class="ltr:pr-3 rtl:pl-3" href="http://localhost:1313/post/%E5%B8%8C%E8%85%8A%E5%AD%97%E6%AF%8D%E8%A1%A8/"
+      ><span class="ltr:mr-1.5 rtl:ml-1.5">←</span><span>希腊字母表</span></a
+    >
     
+    
+    <a class="ltr:ml-auto rtl:mr-auto justify-end pl-3" href="http://localhost:1313/post/%E5%8D%9A%E5%AE%A2/"
+      ><span>为什么要建个博客</span><span class="ltr:ml-1.5 rtl:mr-1.5">→</span></a
+    >
+    
+  </nav>
+  
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
 </article>
 
-    
 
-    
+    </main>
 
-     
-    
-        
-    
-
-    <footer class="site-footer">
-    <section class="copyright">
-        &copy; 
-        
-        2024 My New Hugo Site
-    </section>
-    
-    <section class="powerby">
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.27.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
-    </section>
+    <footer
+  class="mx-auto flex h-[4.5rem] max-w-[--w] items-center px-8 text-xs uppercase tracking-wider opacity-60"
+>
+  <div class="mr-auto">
+  
+    &copy; 2024
+    <a class="link" href="http://localhost:1313/">My New Hugo Site</a>
+  
+  </div>
+  <a class="link mx-6" href="https://gohugo.io/" rel="noopener" target="_blank"
+    >powered by hugo️️</a
+  >️
+  <a
+    class="link"
+    href="https://github.com/nanxiaobei/hugo-paper"
+    rel="noopener"
+    target="_blank"
+    >hugo-paper</a
+  >
 </footer>
 
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-
-            </main>
-        </div>
-        <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
-                
-                >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
-<script>
-    (function () {
-        const customFont = document.createElement('link');
-        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
-
-        customFont.type = "text/css";
-        customFont.rel = "stylesheet";
-
-        document.head.appendChild(customFont);
-    }());
-</script>
-
-    </body>
+  </body>
 </html>
