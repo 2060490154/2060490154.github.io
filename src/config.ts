@@ -1,15 +1,31 @@
 import type { Site, SocialObjects } from "./types";
+import type { GiscusProps } from "@giscus/react";
+
+export const GISCUS: GiscusProps = {
+  repo: "2060490154/2060490154.github.io",
+  repoId: "R_kgDOM09elQ",
+  category: "Announcements",
+  categoryId: "DIC_kwDOM09elc4CnqTD",
+  mapping: "pathname",
+  strict:"0",
+  reactionsEnabled: "1",
+  emitMetadata: "0",
+  inputPosition: "bottom",
+  lang: "zh-CN",
+  loading: "lazy",
+  crossorigin: "anonymous",
+};
 
 export const SITE: Site = {
   website: "https://astro-paper.pages.dev/", // replace this with your deployed domain
   author: "Sat Naing",
   profile: "https://satnaing.dev/",
   desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
-  title: "AstroPaper",
+  title: "异想天开的出题者",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,
-  postPerPage: 3,
+  postPerPage: 6,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   showArchives: true,
   editPost: {
@@ -20,15 +36,15 @@ export const SITE: Site = {
 };
 
 export const LOCALE = {
-  lang: "en", // html lang code. Set this empty and default will be "en"
-  langTag: ["en-EN"], // BCP 47 Language Tags. Set this empty [] to use the environment default
+  lang: "zh", // html lang code. Set this empty and default will be "en"
+  langTag: ["zh-CN"], // BCP 47 Language Tags. Set this empty [] to use the environment default
 } as const;
 
 export const LOGO_IMAGE = {
-  enable: false,
+  enable: true,
   svg: true,
-  width: 216,
-  height: 46,
+  width: 96,
+  height: 96,
 };
 
 export const SOCIALS: SocialObjects = [
@@ -54,6 +70,12 @@ export const SOCIALS: SocialObjects = [
     name: "LinkedIn",
     href: "https://github.com/satnaing/astro-paper",
     linkTitle: `${SITE.title} on LinkedIn`,
+    active: false,
+  },
+  {
+    name: "blibli",
+    href: "https://space.bilibili.com/629386398",
+    linkTitle: `点个关注 ${SITE.title} on blibli`,
     active: true,
   },
   {
