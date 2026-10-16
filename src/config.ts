@@ -17,7 +17,7 @@ export const GISCUS: GiscusProps = {
 };
 
 export const SITE: Site = {
-  website: "https://2060490154-github-io.pages.dev/", // replace this with your deployed domain
+  website: "https://ljx520.me/", // replace this with your deployed domain
   author: "异想天开的出题者",
   profile: "https://space.bilibili.com/629386398",
   desc: "怎样都行，别不快乐",
