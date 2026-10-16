@@ -14,6 +14,13 @@ async function loadGoogleFont(
   text: string,
   isBold = false
 ): Promise<ArrayBuffer> {
+  const fontName = isBold ? "bold.ttf" : "regular.ttf";
+  const localFontPath = path.resolve(process.cwd(), `src/assets/fonts/${fontName}`);
+  if (fs.existsSync(localFontPath)) {
+    const buffer = fs.readFileSync(localFontPath);
+    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+  }
+
   try {
     const API = `https://fonts.googleapis.com/css2?family=${font}&text=${encodeURIComponent(text)}`;
 
@@ -41,12 +48,6 @@ async function loadGoogleFont(
     const fonts: ArrayBuffer = await res.arrayBuffer();
     return fonts;
   } catch (err) {
-    const fontName = isBold ? "bold.ttf" : "regular.ttf";
-    const localFontPath = path.resolve(process.cwd(), `src/assets/fonts/${fontName}`);
-    if (fs.existsSync(localFontPath)) {
-      const buffer = fs.readFileSync(localFontPath);
-      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
-    }
     throw err;
   }
 }

@@ -60,7 +60,19 @@ module.exports = {
         }
       },
       fontFamily: {
-        mono: ["IBM Plex Mono", "monospace"],
+        mono: [
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          "Liberation Mono",
+          "PingFang SC",
+          "Microsoft YaHei",
+          "Hiragino Sans GB",
+          "WenQuanYi Micro Hei",
+          "monospace",
+        ],
       },
 
       typography: {
