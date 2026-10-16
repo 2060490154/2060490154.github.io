@@ -1,15 +1,14 @@
 ---
-author : 异想天开的出题者
+author: 异想天开的出题者
 pubDatetime: 2022-09-23T15:22:00Z
 modDatetime: 2023-12-21T09:12:47.400Z
 title: 在astro官网学习过程
 featured: true
 draft: false
 tags:
-  - docs
-description:
-  Some rules & recommendations for creating or adding new posts using AstroPaper
-  theme.
+  - Astro
+  - 学习笔记
+description: 记录早期在 Astro 官网学习环境搭建与基础配置的过程。
 ---
 ## 安装必要的软件
 确保安装了npm，pnpm，nodejs以及git。其中pnpm是npm的上位替代

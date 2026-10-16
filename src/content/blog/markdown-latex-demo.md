@@ -1,15 +1,13 @@
 ---
-author : 异想天开的出题者
+author: 异想天开的出题者
 pubDatetime: 2023-09-23T15:22:00Z
 modDatetime: 2023-12-21T09:12:47.400Z
-title: 在官网学习过程
-featured: true
+title: Markdown 与 LaTeX 渲染测试
+featured: false
 draft: false
 tags:
-  - docs
-description:
-  Some rules & recommendations for creating or adding new posts using AstroPaper
-  theme.
+  - 语法测试
+description: 测试代码高亮、折叠代码块与 LaTeX 数学公式渲染效果。
 ---
 
 

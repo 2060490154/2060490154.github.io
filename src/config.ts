@@ -17,10 +17,10 @@ export const GISCUS: GiscusProps = {
 };
 
 export const SITE: Site = {
-  website: "https://astro-paper.pages.dev/", // replace this with your deployed domain
-  author: "Sat Naing",
-  profile: "https://satnaing.dev/",
-  desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
+  website: "https://2060490154-github-io.pages.dev/", // replace this with your deployed domain
+  author: "异想天开的出题者",
+  profile: "https://space.bilibili.com/629386398",
+  desc: "怎样都行，别不快乐",
   title: "异想天开的出题者",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
@@ -29,7 +29,7 @@ export const SITE: Site = {
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   showArchives: true,
   editPost: {
-    url: "https://github.com/satnaing/astro-paper/edit/main/src/content/blog",
+    url: "https://github.com/2060490154/2060490154.github.io/edit/main/src/content/blog",
     text: "Suggest Changes",
     appendFilePath: true,
   },
@@ -50,7 +50,7 @@ export const LOGO_IMAGE = {
 export const SOCIALS: SocialObjects = [
   {
     name: "Github",
-    href: "https://github.com/satnaing/astro-paper",
+    href: "https://github.com/2060490154",
     linkTitle: ` ${SITE.title} on Github`,
     active: true,
   },
@@ -58,13 +58,13 @@ export const SOCIALS: SocialObjects = [
     name: "Facebook",
     href: "https://github.com/satnaing/astro-paper",
     linkTitle: `${SITE.title} on Facebook`,
-    active: true,
+    active: false,
   },
   {
     name: "Instagram",
     href: "https://github.com/satnaing/astro-paper",
     linkTitle: `${SITE.title} on Instagram`,
-    active: true,
+    active: false,
   },
   {
     name: "LinkedIn",
