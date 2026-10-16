@@ -8,7 +8,8 @@ import type { CollectionEntry } from "astro:content";
 import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
 import { SITE } from "@config";
-import Comments from "@components/Comments";
+import Comments from "@components/Comments.astro";
+import "katex/dist/katex.min.css";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -46,7 +47,6 @@ const layoutProps = {
   canonicalURL,
   ogImage: ogUrl,
   scrollSmooth: true,
-  hasMath: true,
 };
 
 /* ========== Prev/Next Posts ========== */
@@ -116,7 +116,7 @@ const nextPost =
       <ShareLinks />
     </div>
 
-    <Comments client:only="react" />
+    <Comments />
 
     <hr class="my-6 border-dashed" />
 

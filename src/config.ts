@@ -1,13 +1,12 @@
 import type { Site, SocialObjects } from "./types";
-import type { GiscusProps } from "@giscus/react";
 
-export const GISCUS: GiscusProps = {
+export const GISCUS = {
   repo: "2060490154/2060490154.github.io",
   repoId: "R_kgDOM09elQ",
   category: "Announcements",
   categoryId: "DIC_kwDOM09elc4CnqTD",
   mapping: "pathname",
-  strict:"0",
+  strict: "0",
   reactionsEnabled: "1",
   emitMetadata: "0",
   inputPosition: "bottom",

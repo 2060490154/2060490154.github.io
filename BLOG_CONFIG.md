@@ -68,9 +68,9 @@ pnpm preview       # 本地预览打包产物
 本项目经过深度网络调优，实测页面加载耗时从最初的 1300ms+ 降低至 300ms 左右：
 
 ### 1. 边缘全站 HTML 缓存（Cache Rules）
-* **规则配置**：在 Cloudflare 中配置了 `全站HTML边缘缓存` 规则（匹配 `http.host eq "ljx520.me"`）。
-* **边缘 TTL**：设置为 `4 hours`。
-* **浏览器 TTL**：设置为 `接受源服务器 TTL`（保持 `max-age=0, must-revalidate`）。
+* **规则配置**：在 Cloudflare 中配置了全站缓存规则（匹配 `http.host eq "ljx520.me"`）。
+* **边缘 TTL**：选择 **`使用缓存控制标头（如果存在），否则绕过缓存`**。Cloudflare 免费版“忽略缓存标头、使用固定 TTL”模式最短只能选 2 小时，因此改用尊重源站头的模式：由 `public/_headers` 中的 `s-maxage=300` 控制边缘缓存 5 分钟（想更短/更长只需改这一个数字，`60`=1 分钟，`1800`=30 分钟）。
+* **浏览器 TTL**：设置为 `接受源服务器 TTL`，实际由 `public/_headers` 的 `max-age=60, stale-while-revalidate=86400` 控制。
 * **收益**：访客打开首页与文章时直接由最近的 Anycast 节点提供服务，首字节时间（TTFB）大幅下降。
 
 ### 2. 静态打包资源永久强缓存（Immutable Cache）
@@ -83,13 +83,21 @@ pnpm preview       # 本地预览打包产物
   /assets/*
     Cache-Control: public, max-age=31536000, immutable
 
+  /posts/*.png
+    Cache-Control: public, max-age=86400
+
   /favicon.svg
     Cache-Control: public, max-age=86400
 
   /astropaper-og.jpg
     Cache-Control: public, max-age=604800
+
+  /*
+    Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=86400
   ```
-* **收益**：带有哈希值的 CSS / JS 静态资源被访客浏览器永久存入磁盘，二次跳转时静态资源 0ms 秒读。
+* **注意**：`s-maxage` 控制边缘缓存时长（5 分钟），`max-age` 控制浏览器缓存时长（60 秒），浏览器会忽略 `s-maxage`。
+* **注意**：`/posts/*.png` 是构建期由 Satori 生成的 OG 分享图（`src/pages/posts/[slug]/index.png.ts`），并非仓库内静态文件。
+* **收益**：带有哈希值的 CSS / JS 静态资源被访客浏览器永久存入磁盘，二次跳转时静态资源 0ms 秒读；HTML 文档 60 秒内返回缓存、过期后后台静默刷新。
 
 ### 3. 高级传输协议（Cloudflare 边缘开关）
 * **HTTP/3 (QUIC)**：`开启`（基于 UDP 传输，消灭弱网与移动端队头阻塞）。
@@ -99,7 +107,9 @@ pnpm preview       # 本地预览打包产物
 
 ### 4. 前端交互与加载提速
 * **Astro Prefetch 预加载**：在 `astro.config.ts` 中开启了 `prefetchAll: true, defaultStrategy: "hover"`。访客鼠标滑过链接瞬间在后台静默拉取目标页，点击时如同单页应用（SPA）瞬间切换。
-* **KaTeX 公式按需加载**：在 `src/layouts/Layout.astro` 中将 22KB 的 KaTeX 样式改为按需加载（仅在文章正文启用），减轻非公式页首屏负载。
+* **KaTeX 样式本地化**：KaTeX CSS 与字体已由 Vite 打包为本地 `_astro/` 资源（文章页独立 CSS chunk），移除了 cdnjs 外链，消除额外 DNS / TLS 握手并享受同域强缓存。
+* **评论区零 React**：`src/components/Comments.astro` 使用 giscus 官方原生脚本，通过 IntersectionObserver 距离视口 600px 时才加载；文章页不再下载 135KB 的 React runtime。
+* **主题脚本内联**：`toggle-theme.js` 已内联进 `src/layouts/Layout.astro` 的 `<head>`，消除每个页面一次额外请求（原 `public/toggle-theme.js` 已删除）。
 * **中文单字搜索优化**：在 `src/components/Search.tsx` 中将 Fuse.js 最低字符限制改为 1（`minMatchCharLength: 1`），完美解决中文单字（如“学”、“天”）搜不出结果的问题。
 
 ---
@@ -145,10 +155,8 @@ git commit -m "feat: 发布新文章-xxx"
 git push origin main
 ```
 * **自动发布**：GitHub 收到推送后，Cloudflare Pages 会在 15~30 秒内自动拉取代码并完成构建上线。
-* **全球缓存即时刷新**（可选）：
-  由于设置了 4 小时的边缘 HTML 缓存，如果发布新文章后想让 `https://ljx520.me/` 全球节点即刻刷新：
-  * 打开 [Cloudflare 控制台](https://dash.cloudflare.com/) ➡️ 进入 `ljx520.me`。
-  * 点击左侧 **`Caching`（缓存）** ➡️ **`Configuration`（配置）** ➡️ 点击 **`Purge Everything`（清除所有内容）** 即可。
+* **全球缓存即时刷新**：正常无需操作——边缘缓存由 `_headers` 的 `s-maxage=300` 控制为 5 分钟，新文章最多 5 分钟自动全球可见。
+  * 需要立即可见时（如刚发布想马上分享）：打开 [Cloudflare 控制台](https://dash.cloudflare.com/) ➡️ 进入 `ljx520.me` ➡️ **`Caching`（缓存）** ➡️ **`Configuration`（配置）** ➡️ 点击 **`Purge Everything`（清除所有内容）** 即可。
 
 ---
 
@@ -158,9 +166,10 @@ git push origin main
 | :--- | :--- |
 | `src/config.ts` | 站点基本信息、作者名、Slogan、社交媒体链接与 Giscus 配置 |
 | `astro.config.ts` | Astro 框架配置、Prefetch 预加载策略、Markdown/LaTeX 插件 |
-| `public/_headers` | Cloudflare Pages 静态资源 1 年强缓存与头信息配置 |
+| `public/_headers` | Cloudflare Pages 缓存头配置（哈希资源 1 年 immutable，HTML 60s + SWR） |
 | `tailwind.config.cjs` | 样式与原生跨平台系统字体栈配置 |
-| `src/layouts/Layout.astro` | 全站根 HTML 骨架、SEO 结构化数据、KaTeX 按需加载 |
-| `src/layouts/PostDetails.astro` | 文章详情页模版、上一篇/下一篇导航、回到顶部、评论区 |
+| `src/layouts/Layout.astro` | 全站根 HTML 骨架、SEO 结构化数据、内联主题切换脚本 |
+| `src/layouts/PostDetails.astro` | 文章详情页模版、上一篇/下一篇导航、回到顶部、KaTeX 样式引入 |
+| `src/components/Comments.astro` | giscus 评论区（原生脚本 + 懒加载 + 主题同步，无 React） |
 | `src/components/Search.tsx` | 中文模糊搜索核心组件（Fuse.js） |
 | `src/pages/index.astro` | 博客主页布局（精选推荐、最新发布、关于作者） |
