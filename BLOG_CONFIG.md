@@ -106,7 +106,7 @@ pnpm preview       # 本地预览打包产物
 * **Brotli 极致压缩**：`开启`（比 Gzip 体积更小）。
 
 ### 4. 前端交互与加载提速
-* **Astro Prefetch 预加载**：在 `astro.config.ts` 中开启了 `prefetchAll: true, defaultStrategy: "hover"`。访客鼠标滑过链接瞬间在后台静默拉取目标页，点击时如同单页应用（SPA）瞬间切换。
+* **Astro Prefetch 预加载**：在 `astro.config.ts` 中开启了 `prefetchAll: true, defaultStrategy: "viewport"`。链接进入视口即在后台静默拉取目标页（桌面与移动端均生效），点击时如同单页应用（SPA）瞬间切换。
 * **KaTeX 样式本地化**：KaTeX CSS 与字体已由 Vite 打包为本地 `_astro/` 资源（文章页独立 CSS chunk），移除了 cdnjs 外链，消除额外 DNS / TLS 握手并享受同域强缓存。
 * **评论区零 React**：`src/components/Comments.astro` 使用 giscus 官方原生脚本，通过 IntersectionObserver 距离视口 600px 时才加载；文章页不再下载 135KB 的 React runtime。
 * **主题脚本内联**：`toggle-theme.js` 已内联进 `src/layouts/Layout.astro` 的 `<head>`，消除每个页面一次额外请求（原 `public/toggle-theme.js` 已删除）。

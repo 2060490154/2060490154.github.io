@@ -15,7 +15,7 @@ export default defineConfig({
   site: SITE.website,
   prefetch: {
     prefetchAll: true,
-    defaultStrategy: "hover",
+    defaultStrategy: "viewport",
   },
   integrations: [
     tailwind({
