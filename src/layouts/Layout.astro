@@ -19,6 +19,7 @@ export interface Props {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
+  hasMath?: boolean;
 }
 
 const {
@@ -31,6 +32,7 @@ const {
   pubDatetime,
   modDatetime,
   scrollSmooth = false,
+  hasMath = false,
 } = Astro.props;
 
 const socialImageURL = new URL(
@@ -76,8 +78,15 @@ const structuredData = {
     <meta name="author" content={author} />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- KaTeX CSS (Cloudflare CDN) -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" />
+    {
+      hasMath && (
+        <!-- KaTeX CSS (Cloudflare CDN) -->
+        <link
+          href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css"
+          rel="stylesheet"
+        />
+      )
+    }
 
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content={title} />

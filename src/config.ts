@@ -30,7 +30,7 @@ export const SITE: Site = {
   showArchives: true,
   editPost: {
     url: "https://github.com/2060490154/2060490154.github.io/edit/main/src/content/blog",
-    text: "Suggest Changes",
+    text: "提出修改建议",
     appendFilePath: true,
   },
 };

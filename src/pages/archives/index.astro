@@ -16,24 +16,24 @@ if (!SITE.showArchives) {
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 
 const MonthMap: Record<string, string> = {
-  "1": "January",
-  "2": "February",
-  "3": "March",
-  "4": "April",
-  "5": "May",
-  "6": "June",
-  "7": "July",
-  "8": "August",
-  "9": "September",
-  "10": "October",
-  "11": "November",
-  "12": "December",
+  "1": "1月",
+  "2": "2月",
+  "3": "3月",
+  "4": "4月",
+  "5": "5月",
+  "6": "6月",
+  "7": "7月",
+  "8": "8月",
+  "9": "9月",
+  "10": "10月",
+  "11": "11月",
+  "12": "12月",
 };
 ---
 
-<Layout title={`Archives | ${SITE.title}`}>
+<Layout title={`归档 | ${SITE.title}`}>
   <Header activeNav="archives" />
-  <Main pageTitle="Archives" pageDesc="All the articles I've archived.">
+  <Main pageTitle="归档" pageDesc="按年份与月份查看所有历史文章。">
     {
       Object.entries(
         getPostsByGroupCondition(posts, post =>
