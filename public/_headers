@@ -1,23 +1,59 @@
-# Hashed build assets (Astro/Vite output): immutable for one year
+# NOTE: Cloudflare Pages merges the headers of EVERY matching rule.
+# Keep all rules non-overlapping, and add new page paths explicitly.
+# Cache Rule "Use cache-control headers when present" then derives the
+# edge TTL from s-maxage, while browsers use max-age.
+
+# === Immutable hashed build assets ===
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Static theme assets
+# === Static theme assets ===
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Blog images served from public/posts (unhashed)
-/posts/*.png
-  Cache-Control: public, max-age=86400
-
+# === Static images ===
 /favicon.svg
   Cache-Control: public, max-age=86400
 
 /astropaper-og.jpg
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=86400
 
-# HTML documents & misc files: short browser TTL, background revalidation.
-# s-maxage controls the edge cache TTL when the Cache Rule is set to
-# "Use cache-control headers when present, otherwise bypass" (5 minutes).
-/*
-  Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=86400
+/og.png
+  Cache-Control: public, max-age=86400
+
+/posts/*.png
+  Cache-Control: public, max-age=86400
+
+# === Home & listing pages: new posts surface within ~10 min ===
+/
+  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+
+/posts/
+  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+
+/tags/*
+  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+
+/archives/
+  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+
+# === Article pages: stable content, kept on the edge for a day ===
+/posts/:slug/
+  Cache-Control: public, max-age=60, s-maxage=86400, stale-while-revalidate=604800
+
+# === Standalone pages ===
+/about/
+  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+
+/search/
+  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+
+# === Feeds & metadata ===
+/rss.xml
+  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+
+/robots.txt
+  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+
+/sitemap*
+  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400

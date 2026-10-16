@@ -69,33 +69,46 @@ pnpm preview       # 本地预览打包产物
 
 ### 1. 边缘全站 HTML 缓存（Cache Rules）
 * **规则配置**：在 Cloudflare 中配置了全站缓存规则（匹配 `http.host eq "ljx520.me"`）。
-* **边缘 TTL**：选择 **`使用缓存控制标头（如果存在），否则绕过缓存`**。Cloudflare 免费版“忽略缓存标头、使用固定 TTL”模式最短只能选 2 小时，因此改用尊重源站头的模式：由 `public/_headers` 中的 `s-maxage=300` 控制边缘缓存 5 分钟（想更短/更长只需改这一个数字，`60`=1 分钟，`1800`=30 分钟）。
+* **边缘 TTL**：选择 **`使用缓存控制标头（如果存在），否则绕过缓存`**。Cloudflare 免费版“忽略缓存标头、使用固定 TTL”模式最短只能选 2 小时，因此改用尊重源站头的模式：由 `public/_headers` 按页面类型分配 `s-maxage`（列表页 600s / 文章页 86400s / 其余 3600s）。
 * **浏览器 TTL**：设置为 `接受源服务器 TTL`，实际由 `public/_headers` 的 `max-age=60, stale-while-revalidate=86400` 控制。
 * **收益**：访客打开首页与文章时直接由最近的 Anycast 节点提供服务，首字节时间（TTFB）大幅下降。
 
 ### 2. 静态打包资源永久强缓存（Immutable Cache）
 * **配置文件**：`public/_headers`（打包后位于 `dist/_headers`）。
-* **规则详情**：
+* **规则详情**（按页面类型分配 TTL；注意 Cloudflare Pages 会合并**所有**匹配规则的头，因此规则必须互不重叠）：
   ```http
-  /_astro/*
-    Cache-Control: public, max-age=31536000, immutable
+  # 列表/导航页 —— 新文章 ~10 分钟内可见
+  /
+  /posts/
+  /tags/*
+  /archives/
+    Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
 
+  # 文章详情页 —— 内容稳定，边缘常驻 1 天
+  /posts/:slug/
+    Cache-Control: public, max-age=60, s-maxage=86400, stale-while-revalidate=604800
+
+  # 独立页 / 订阅 / 元数据 —— 1 小时
+  /about/
+  /search/
+  /rss.xml
+  /robots.txt
+  /sitemap*
+    Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+
+  # 静态资源 —— 1 年 immutable
+  /_astro/*
   /assets/*
     Cache-Control: public, max-age=31536000, immutable
 
+  # 静态图片
+  /favicon.svg
+  /astropaper-og.jpg
+  /og.png
   /posts/*.png
     Cache-Control: public, max-age=86400
-
-  /favicon.svg
-    Cache-Control: public, max-age=86400
-
-  /astropaper-og.jpg
-    Cache-Control: public, max-age=604800
-
-  /*
-    Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=86400
   ```
-* **注意**：`s-maxage` 控制边缘缓存时长（5 分钟），`max-age` 控制浏览器缓存时长（60 秒），浏览器会忽略 `s-maxage`。
+* **注意**：`s-maxage` 控制边缘缓存时长，`max-age` 控制浏览器缓存时长（浏览器会忽略 `s-maxage`）。新增页面类型时要在这里显式加规则（不要用 `/*` 兜底，会与具体规则叠加导致 TTL 不可预测）。
 * **注意**：`/posts/*.png` 是构建期由 Satori 生成的 OG 分享图（`src/pages/posts/[slug]/index.png.ts`），并非仓库内静态文件。
 * **收益**：带有哈希值的 CSS / JS 静态资源被访客浏览器永久存入磁盘，二次跳转时静态资源 0ms 秒读；HTML 文档 60 秒内返回缓存、过期后后台静默刷新。
 
@@ -155,8 +168,10 @@ git commit -m "feat: 发布新文章-xxx"
 git push origin main
 ```
 * **自动发布**：GitHub 收到推送后，Cloudflare Pages 会在 15~30 秒内自动拉取代码并完成构建上线。
-* **全球缓存即时刷新**：正常无需操作——边缘缓存由 `_headers` 的 `s-maxage=300` 控制为 5 分钟，新文章最多 5 分钟自动全球可见。
-  * 需要立即可见时（如刚发布想马上分享）：打开 [Cloudflare 控制台](https://dash.cloudflare.com/) ➡️ 进入 `ljx520.me` ➡️ **`Caching`（缓存）** ➡️ **`Configuration`（配置）** ➡️ 点击 **`Purge Everything`（清除所有内容）** 即可。
+* **全球缓存即时刷新**：正常情况下无需操作——
+  * 发布新文章：列表页（首页/文章列表）边缘缓存 10 分钟自动滚动；文章页是新 URL，立即可见。
+  * 修改已发布文章：文章页边缘缓存为 1 天，想立即可见时打开 [Cloudflare 控制台](https://dash.cloudflare.com/) ➡️ 进入 `ljx520.me` ➡️ **`Caching`（缓存）** ➡️ **`Configuration`（配置）** ➡️ 点击 **`Purge Everything`（清除所有内容）**。
+  * 实测 Cloudflare 边缘的 `stale-while-revalidate` 对 HTML 不生效，因此不要在 HTML 上使用短 TTL——低流量站点的短 TTL 会让每个访客都触发回源（实测回源 TTFB 约 1~2s）。
 
 ---
 
