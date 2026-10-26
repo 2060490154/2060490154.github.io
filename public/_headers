@@ -24,7 +24,7 @@
   Cache-Control: public, max-age=86400
 
 /posts/*.png
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=86400, s-maxage=31536000
 
 # === Home & listing pages: new posts surface within ~10 min ===
 /
@@ -67,3 +67,6 @@
 # Browsers pin this policy for max-age, so it cannot be undone quickly.
 /*
   Strict-Transport-Security: max-age=15552000
+  Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
