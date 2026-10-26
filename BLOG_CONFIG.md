@@ -60,6 +60,10 @@ pnpm preview       # 本地预览打包产物
    * Zone ID：`32d9990ec4fe01e99cd72dd6ec276cdc`
    * 状态：`active`
 4. **SSL / TLS 证书**：由 Cloudflare 自动签发并维护（Google Trust Services CA），开启强制 HTTPS 301 重定向；HSTS 由 `public/_headers` 全站下发（`max-age=15552000`，暂未启用 `includeSubDomains` 与 `preload`）。
+5. **www 子域 301 到根域**：通过 Cloudflare **Bulk Redirects**（账户级 URL Forwarding）实现，源 `www.ljx520.me/` → 目标 `https://ljx520.me`，301、保留查询串与路径后缀。列表名 `www_to_apex`，规则位于 `http_request_redirect` 阶段。
+   * **为什么不用 Redirect Rules**：`www.ljx520.me` 是 Pages 项目的自定义域，该主机名的请求**不经过** Zone 的 `http_request_dynamic_redirect` 阶段（实测同一条路径规则在根域立即生效、在 www 从不触发）。
+   * **为什么不用 `_redirects`**：Cloudflare 官方明确不支持域名级重定向，该写法会被静默忽略。
+   * Bulk Redirects 运行在 Pages 之前，是当前唯一有效且不需要改代码发版的方案；www 的 DNS 仍是 CNAME 到根域，无需改成文档里的 `A 192.0.2.1`。
 
 ---
 
