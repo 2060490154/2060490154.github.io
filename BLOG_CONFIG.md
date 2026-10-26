@@ -23,7 +23,7 @@
 * **核心框架**：[Astro v4.16.x](https://astro.build/)（采用静态构建模式 `output: "static"`）
 * **基础主题**：AstroPaper v4.8.0（深度定制、汉化与优化版）
 * **Node.js 运行时**：v20.18.0 LTS（通过根目录下 `.node-version` 严格锁定，保证本地与云端一致）
-* **包管理器**：pnpm（v12）/ npm
+* **包管理器**：pnpm（仓库只保留 `pnpm-lock.yaml`；`package-lock.json` 已移除，避免两套锁文件互相漂移）。CI 与 Cloudflare Pages 均走 pnpm。
 * **样式框架**：Tailwind CSS v3 + @tailwindcss/typography
 * **离线字体与降级**：
   * **正文字体**：纯原生系统字体栈（macOS/iOS 苹方与 SFMono，Windows 微软雅黑与 Consolas，Linux 文泉驿微米黑与 Liberation Mono）。彻底移除外部 Google Fonts 网络依赖，0ms 渲染无闪烁。
@@ -116,9 +116,12 @@ pnpm preview       # 本地预览打包产物
   /posts/*.png
     Cache-Control: public, max-age=86400
 
-  # 全站传输安全 —— 只设置 HSTS，不带 Cache-Control，不参与上面的 TTL 推导
+  # 全站安全与传输头 —— 只设置响应头，不带 Cache-Control，不参与上面的 TTL 推导
   /*
     Strict-Transport-Security: max-age=15552000
+    Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'
+    X-Frame-Options: DENY
+    Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   ```
 * **注意**：`s-maxage` 控制边缘缓存时长，`max-age` 控制浏览器缓存时长（浏览器会忽略 `s-maxage`）。新增页面类型时要在这里显式加规则（不要用 `/*` 兜底，会与具体规则叠加导致 TTL 不可预测）。
 * **注意**：`/posts/*.png` 是构建期由 Satori 生成的 OG 分享图（`src/pages/posts/[slug]/index.png.ts`），并非仓库内静态文件。
@@ -132,8 +135,9 @@ pnpm preview       # 本地预览打包产物
 
 ### 4. 前端交互与加载提速
 * **Astro Prefetch 预加载**：在 `astro.config.ts` 中开启了 `prefetchAll: true, defaultStrategy: "viewport"`。链接进入视口即在后台静默拉取目标页（桌面与移动端均生效），点击时如同单页应用（SPA）瞬间切换。
-* **KaTeX 样式本地化**：KaTeX CSS 与字体已由 Vite 打包为本地 `_astro/` 资源（文章页独立 CSS chunk），移除了 cdnjs 外链，消除额外 DNS / TLS 握手并享受同域强缓存。
+* **KaTeX 样式按需加载**：KaTeX CSS 与字体由 Vite 打包成本地 `_astro/` 资源（已移除 cdnjs 外链）。`PostDetails.astro` 用 `import katexCssHref from "katex/dist/katex.min.css?url"` 取资源地址，仅在正文含 `$...$` / `$$...$$` 时才插入 `<link>`。注意：Astro 会把组件里静态 `import` 的 CSS 提升到共享 chunk，所以「条件渲染一个承担 import 的组件」是无效的，必须走 `?url` 才能真正按文章拆包。实测无公式的文章页不再加载这 28KB。
 * **评论区零 React**：`src/components/Comments.astro` 使用 giscus 官方原生脚本，通过 IntersectionObserver 距离视口 600px 时才加载；文章页不再下载 135KB 的 React runtime。
+* **搜索页延迟水合**：`src/pages/search.astro` 的 `SearchBar` 用 `client:idle`（原 `client:load`），先把静态输入框交给浏览器，空闲时才下载 React runtime（135KB，Brotli 后约 40KB）。只有搜索页受影响。
 * **主题脚本内联**：`toggle-theme.js` 已内联进 `src/layouts/Layout.astro` 的 `<head>`，消除每个页面一次额外请求（原 `public/toggle-theme.js` 已删除）。
 * **中文单字搜索优化**：在 `src/components/Search.tsx` 中将 Fuse.js 最低字符限制改为 1（`minMatchCharLength: 1`），完美解决中文单字（如“学”、“天”）搜不出结果的问题。
 
@@ -180,6 +184,7 @@ git commit -m "feat: 发布新文章-xxx"
 git push origin main
 ```
 * **自动发布**：GitHub 收到推送后，Cloudflare Pages 会在 15~30 秒内自动拉取代码并完成构建上线。
+* **推送即校验**：`.github/workflows/ci.yml` 在 **push 到 main** 和 PR 时都会跑 `lint` / `format:check` / `build`（Node 版本读 `.node-version`，pnpm 9 + `--frozen-lockfile`）。注意：`pnpm format:check` 在 Windows 本地会因 CRLF 换行全量报错，这是本机 `core.autocrlf=true` 造成的现象，Linux runner 上文件是 LF，检查是干净的。
 * **全球缓存即时刷新**：正常情况下无需操作——
   * 发布新文章：列表页（首页/文章列表）边缘缓存 10 分钟自动滚动；文章页是新 URL，立即可见。
   * 修改已发布文章：文章页边缘缓存为 1 天，想立即可见时打开 [Cloudflare 控制台](https://dash.cloudflare.com/) ➡️ 进入 `ljx520.me` ➡️ **`Caching`（缓存）** ➡️ **`Configuration`（配置）** ➡️ 点击 **`Purge Everything`（清除所有内容）**。
@@ -196,7 +201,7 @@ git push origin main
 | `public/_headers` | Cloudflare Pages 缓存头配置（哈希资源 1 年 immutable，HTML 60s + SWR） |
 | `tailwind.config.cjs` | 样式与原生跨平台系统字体栈配置 |
 | `src/layouts/Layout.astro` | 全站根 HTML 骨架、SEO 结构化数据、内联主题切换脚本 |
-| `src/layouts/PostDetails.astro` | 文章详情页模版、上一篇/下一篇导航、回到顶部、KaTeX 样式引入 |
+| `src/layouts/PostDetails.astro` | 文章详情页模版、上一篇/下一篇导航、回到顶部、KaTeX 样式按需引入 |
 | `src/components/Comments.astro` | giscus 评论区（原生脚本 + 懒加载 + 主题同步，无 React） |
 | `src/components/Search.tsx` | 中文模糊搜索核心组件（Fuse.js） |
 | `src/pages/index.astro` | 博客主页布局（精选推荐、最新发布、关于作者） |
