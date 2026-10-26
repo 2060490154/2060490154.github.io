@@ -9,7 +9,7 @@ import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
 import { SITE } from "@config";
 import Comments from "@components/Comments.astro";
-import "katex/dist/katex.min.css";
+import katexCssHref from "katex/dist/katex.min.css?url";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -31,6 +31,11 @@ const {
 } = post.data;
 
 const { Content } = await post.render();
+
+// KaTeX ships ~29 KB of CSS and only matters for posts that actually contain
+// math. Detect the delimiters in the raw markdown so the stylesheet is pulled
+// in per post instead of on every article page.
+const hasMath = /\$[^$\r\n]+\$|\$\$[\s\S]+?\$\$/.test(post.body ?? "");
 
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
@@ -64,6 +69,7 @@ const nextPost =
 ---
 
 <Layout {...layoutProps}>
+  {hasMath && <link rel="stylesheet" href={katexCssHref} />}
   <Header />
 
   <div class="mx-auto flex w-full max-w-3xl justify-start px-2">
