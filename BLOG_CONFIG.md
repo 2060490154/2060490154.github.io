@@ -59,7 +59,7 @@ pnpm preview       # 本地预览打包产物
    * 域名：`ljx520.me`
    * Zone ID：`32d9990ec4fe01e99cd72dd6ec276cdc`
    * 状态：`active`
-4. **SSL / TLS 证书**：由 Cloudflare 自动签发并维护（Google Trust Services CA），开启强制 HTTPS 301 重定向与 HSTS。
+4. **SSL / TLS 证书**：由 Cloudflare 自动签发并维护（Google Trust Services CA），开启强制 HTTPS 301 重定向；HSTS 由 `public/_headers` 全站下发（`max-age=15552000`，暂未启用 `includeSubDomains` 与 `preload`）。
 
 ---
 
@@ -96,10 +96,14 @@ pnpm preview       # 本地预览打包产物
   /sitemap*
     Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
 
-  # 静态资源 —— 1 年 immutable
+  # 构建产物（文件名含内容哈希）—— 1 年 immutable
   /_astro/*
-  /assets/*
     Cache-Control: public, max-age=31536000, immutable
+
+  # public/assets 下的原样文件（logo.png 等，文件名无哈希）—— 1 天
+  # 注意：绝不能给这里加 immutable，否则换图后老访客一年都看不到新图
+  /assets/*
+    Cache-Control: public, max-age=86400
 
   # 静态图片
   /favicon.svg
@@ -107,6 +111,10 @@ pnpm preview       # 本地预览打包产物
   /og.png
   /posts/*.png
     Cache-Control: public, max-age=86400
+
+  # 全站传输安全 —— 只设置 HSTS，不带 Cache-Control，不参与上面的 TTL 推导
+  /*
+    Strict-Transport-Security: max-age=15552000
   ```
 * **注意**：`s-maxage` 控制边缘缓存时长，`max-age` 控制浏览器缓存时长（浏览器会忽略 `s-maxage`）。新增页面类型时要在这里显式加规则（不要用 `/*` 兜底，会与具体规则叠加导致 TTL 不可预测）。
 * **注意**：`/posts/*.png` 是构建期由 Satori 生成的 OG 分享图（`src/pages/posts/[slug]/index.png.ts`），并非仓库内静态文件。

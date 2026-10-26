@@ -8,8 +8,10 @@
   Cache-Control: public, max-age=31536000, immutable
 
 # === Static theme assets ===
+# These filenames have NO content hash (logo.png, dev.svg ...), so `immutable`
+# would pin a stale copy in visitor browsers for a year after the file changes.
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=86400
 
 # === Static images ===
 /favicon.svg
@@ -57,3 +59,11 @@
 
 /sitemap*
   Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+
+# === Transport security (every path) ===
+# This block only sets HSTS - it carries no Cache-Control, so it never
+# participates in the edge-TTL merge above. includeSubDomains/preload are
+# intentionally omitted: only add them once every subdomain is HTTPS-only.
+# Browsers pin this policy for max-age, so it cannot be undone quickly.
+/*
+  Strict-Transport-Security: max-age=15552000
