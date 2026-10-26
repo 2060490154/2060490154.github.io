@@ -8,13 +8,16 @@
 
 * **博客名称**：异想天开的出题者
 * **座右铭 / Slogan**：怎样都行，别不快乐
-* **专属顶级域名**：[https://ljx520.me/](https://ljx520.me/)（支持根域及 www 双跳转）
+* **专属顶级域名**：[https://ljx520.me/](https://ljx520.me/)（唯一正式地址；`www.ljx520.me` 以 301 永久跳转到根域，见第三节第 5 条）
 * **备用/源站域名**：[https://2060490154-github-io.pages.dev/](https://2060490154-github-io.pages.dev/)
 * **作者社交链接**：
   * **GitHub**：[https://github.com/2060490154](https://github.com/2060490154)
   * **哔哩哔哩**：[https://space.bilibili.com/629386398](https://space.bilibili.com/629386398)
 * **代码仓库**：`git@github.com:2060490154/2060490154.github.io.git`（分支：`main`）
-* **本地工作区目录**：`/home/archer/Projects/blog`
+* **本地工作区目录**：
+  * Linux（Arch 笔记本）：`/home/archer/Projects/blog`
+  * Windows（主力机）：`C:\Users\Administrator\work\blog`
+* **同步模型**：两台机器**都只与 GitHub 同步**，彼此不直连。`origin` 指向 GitHub，`pull.ff = only`（只允许快进，分叉时直接报错而不是生成合并提交）。
 
 ---
 
@@ -31,10 +34,12 @@
 
 ### 常用本地命令
 ```bash
-pnpm install       # 安装依赖
+pnpm install       # 安装依赖（唯一锁文件 pnpm-lock.yaml）
 pnpm dev           # 本地启动开发服务器 (http://localhost:4321)
 pnpm build         # 本地生产打包 (输出至 dist/)
 pnpm preview       # 本地预览打包产物
+pnpm lint          # ESLint
+pnpm format:check  # Prettier 校验（Windows 上会因 CRLF 误报，见第六节）
 ```
 
 ---
@@ -77,7 +82,7 @@ pnpm preview       # 本地预览打包产物
 * **浏览器 TTL**：设置为 `接受源服务器 TTL`，实际由 `public/_headers` 的 `max-age=60, stale-while-revalidate=86400` 控制。
 * **收益**：访客打开首页与文章时直接由最近的 Anycast 节点提供服务，首字节时间（TTFB）大幅下降。
 
-### 2. 静态打包资源永久强缓存（Immutable Cache）
+### 2. 静态资源缓存分级（Immutable / 短 TTL）
 * **配置文件**：`public/_headers`（打包后位于 `dist/_headers`）。
 * **规则详情**（按页面类型分配 TTL；注意 Cloudflare Pages 会合并**所有**匹配规则的头，因此规则必须互不重叠）：
   ```http
@@ -113,8 +118,11 @@ pnpm preview       # 本地预览打包产物
   /favicon.svg
   /astropaper-og.jpg
   /og.png
-  /posts/*.png
     Cache-Control: public, max-age=86400
+
+  # Satori 构建期生成的 OG 分享图 —— 文件名随文章标题走，可长期驻留边缘
+  /posts/*.png
+    Cache-Control: public, max-age=86400, s-maxage=31536000
 
   # 全站安全与传输头 —— 只设置响应头，不带 Cache-Control，不参与上面的 TTL 推导
   /*
@@ -123,7 +131,7 @@ pnpm preview       # 本地预览打包产物
     X-Frame-Options: DENY
     Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   ```
-* **注意**：`s-maxage` 控制边缘缓存时长，`max-age` 控制浏览器缓存时长（浏览器会忽略 `s-maxage`）。新增页面类型时要在这里显式加规则（不要用 `/*` 兜底，会与具体规则叠加导致 TTL 不可预测）。
+* **注意**：`s-maxage` 控制边缘缓存时长，`max-age` 控制浏览器缓存时长（浏览器会忽略 `s-maxage`）。新增页面类型时要在这里显式加规则；**`/*` 只用来下发与缓存无关的响应头**（就是上面那块 HSTS / CSP），一旦 `/*` 里带了 `Cache-Control`，就会与所有具体规则叠加，TTL 变得不可预测。
 * **注意**：`/posts/*.png` 是构建期由 Satori 生成的 OG 分享图（`src/pages/posts/[slug]/index.png.ts`），并非仓库内静态文件。
 * **收益**：带有哈希值的 CSS / JS 静态资源被访客浏览器永久存入磁盘，二次跳转时静态资源 0ms 秒读；HTML 文档 60 秒内返回缓存、过期后后台静默刷新。
 
@@ -171,7 +179,7 @@ pnpm preview       # 本地预览打包产物
 * **优势**：
   * 免除第三方图床跑路或防盗链风险。
   * 享受同域名 HTTP/3 连接复用（免除了跨域图床 100~200ms 的额外 DNS + TLS 握手）。
-  * 享受项目配好的 Cloudflare 1 年强缓存与 CDN 加速。
+  * **缓存差异**：`src/assets/` 里的图会生成带内容哈希的文件名，命中 `/_astro/*` 的 1 年 immutable；`public/` 下的文件保持原名，其中只有 `public/assets/` 有 1 天规则，`public/images/` 走 Pages 默认值。想要长期强缓存，优先把图放到 `src/assets/` 走哈希。
 
 ---
 
@@ -184,7 +192,10 @@ git commit -m "feat: 发布新文章-xxx"
 git push origin main
 ```
 * **自动发布**：GitHub 收到推送后，Cloudflare Pages 会在 15~30 秒内自动拉取代码并完成构建上线。
-* **推送即校验**：`.github/workflows/ci.yml` 在 **push 到 main** 和 PR 时都会跑 `lint` / `format:check` / `build`（Node 版本读 `.node-version`，pnpm 9 + `--frozen-lockfile`）。注意：`pnpm format:check` 在 Windows 本地会因 CRLF 换行全量报错，这是本机 `core.autocrlf=true` 造成的现象，Linux runner 上文件是 LF，检查是干净的。
+* **推送即校验**：`.github/workflows/ci.yml` 在 **push 到 main** 和 PR 时都会跑 `lint` / `format:check` / `build`（Node 读 `.node-version`，pnpm 12 + `--frozen-lockfile`）。
+  * **pnpm 版本必须 ≥10**：`pnpm-workspace.yaml` 里只有 `allowBuilds` 没有 `packages`，pnpm 9 会直接报 `ERROR packages field missing or empty`，整个 job 挂掉。
+  * **`src/content/blog/` 不参与 Prettier**：格式化器会重排中文长句，并把代码块里的示例压缩（实测把 `function demo() {` 加空行的写法压成 `function demo() {}`）——那是改内容不是改风格，已在 `.prettierignore` 中排除，正文保持手写原样。
+  * **Windows 本地 `pnpm format:check` 会全量报错**：本机 `core.autocrlf=true` 让工作区是 CRLF，而 Prettier 配置要求 LF。这只是本地现象，Linux runner 上是干净的，不要为了"让本地不红"去改仓库。
 * **全球缓存即时刷新**：正常情况下无需操作——
   * 发布新文章：列表页（首页/文章列表）边缘缓存 10 分钟自动滚动；文章页是新 URL，立即可见。
   * 修改已发布文章：文章页边缘缓存为 1 天，想立即可见时打开 [Cloudflare 控制台](https://dash.cloudflare.com/) ➡️ 进入 `ljx520.me` ➡️ **`Caching`（缓存）** ➡️ **`Configuration`（配置）** ➡️ 点击 **`Purge Everything`（清除所有内容）**。
@@ -198,10 +209,45 @@ git push origin main
 | :--- | :--- |
 | `src/config.ts` | 站点基本信息、作者名、Slogan、社交媒体链接与 Giscus 配置 |
 | `astro.config.ts` | Astro 框架配置、Prefetch 预加载策略、Markdown/LaTeX 插件 |
-| `public/_headers` | Cloudflare Pages 缓存头配置（哈希资源 1 年 immutable，HTML 60s + SWR） |
+| `public/_headers` | 全部响应头：缓存策略（哈希资源 1 年 immutable、非哈希 `/assets/*` 1 天、HTML 按类型分 TTL）+ 安全头（HSTS / CSP / X-Frame-Options / Permissions-Policy） |
 | `tailwind.config.cjs` | 样式与原生跨平台系统字体栈配置 |
 | `src/layouts/Layout.astro` | 全站根 HTML 骨架、SEO 结构化数据、内联主题切换脚本 |
 | `src/layouts/PostDetails.astro` | 文章详情页模版、上一篇/下一篇导航、回到顶部、KaTeX 样式按需引入 |
 | `src/components/Comments.astro` | giscus 评论区（原生脚本 + 懒加载 + 主题同步，无 React） |
 | `src/components/Search.tsx` | 中文模糊搜索核心组件（Fuse.js） |
 | `src/pages/index.astro` | 博客主页布局（精选推荐、最新发布、关于作者） |
+| `.github/workflows/ci.yml` | 推送与 PR 触发：lint、format:check、build（pnpm 12 + `.node-version`） |
+| `.prettierignore` | 白名单式忽略：只检查代码与配置，`src/content/blog/` 正文豁免 |
+| `pnpm-workspace.yaml` | pnpm 10+ 的构建脚本白名单（`allowBuilds`: esbuild / sharp / workerd）；注意它**没有** `packages` 字段，低版本 pnpm 会因此报错 |
+
+---
+
+## 八、 2026-10-26 优化记录与已知限制
+
+### 1. 本次落地
+
+| 项 | 变更 |
+| :--- | :--- |
+| HSTS | 由 `public/_headers` 全站下发；边缘的 HSTS 开关**保持关闭**，避免两个来源同时发头导致重复而被浏览器忽略 |
+| www 301 | 改用账户级 **Bulk Redirects**（Zone 的 Redirect Rules 对 Pages 自定义域不生效，`_redirects` 不支持域名级） |
+| `/assets/*` | 去掉误用的 `immutable`，降为 1 天（这些文件名没有内容哈希） |
+| 安全头 | 新增 CSP（`frame-ancestors` / `object-src` / `base-uri`）、`X-Frame-Options`、`Permissions-Policy` |
+| KaTeX | 改为 `katex.min.css?url` + 条件 `<link>`，无公式的文章页省掉 28.8KB CSS |
+| 搜索页 | `client:load` → `client:idle`，React runtime 延后到空闲时加载 |
+| OG 图 | 增加 `s-maxage=31536000` |
+| 依赖 | 删除 `package-lock.json`，只保留 `pnpm-lock.yaml` |
+| CI | Node 18 → `.node-version`；npm → pnpm 12；新增 push 触发；`.prettierignore` 排除正文 |
+
+### 2. 已知限制（有意识保留，不是遗漏）
+
+* **分页缓存误伤**：`/posts/:slug/` 同样会匹配将来的 `/posts/2/`，把它当文章页缓存 1 天。文章超过 10 篇出现第二页时需要处理：改分页路由，或给分页页单独加规则。
+* **KaTeX 字体三份格式**：`dist/_astro` 里同时有 woff2 / woff / ttf，浏览器只会下 woff2，不影响访客，只是部署体积。
+* **Prefetch 全量视口预取**：`prefetchAll + viewport` 会在移动端预取首屏所有链接，属于有意的体验取舍；改成 `hover` 会失去手机端的秒开感。
+* **Bulk Redirects 不在仓库里**：它是账户级配置。Zone 级设置（`_headers`）随仓库走，账户级设置（Bulk Redirects、Pages 构建配置）需要重建时手动重配。
+* **Cloudflare API Token 与本地工具**：令牌在 `C:\Users\Administrator\.cloudflare\api-token`（ACL 收紧到本机用户），配套 `cf.ps1` 直接调 API，令牌从文件读取、不进命令行。例：清缓存
+  ```powershell
+  cd C:\Users\Administrator\.cloudflare
+  .\cf.ps1 -Method POST -Path "/zones/32d9990ec4fe01e99cd72dd6ec276cdc/purge_cache" -Body '{"purge_everything":true}'
+  ```
+  不再需要时请到面板 Revoke，并删除该文件。
+* **CSP 只做了"不碰脚本"的部分**：`script-src` 未设白名单，因为页面有内联主题脚本和 Astro 注入脚本，硬上需要每次构建重算 hash。当前配置已能防点击劫持、插件注入和 `<base>` 劫持。
