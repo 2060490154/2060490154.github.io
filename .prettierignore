@@ -11,3 +11,7 @@
 !.prettierrc
 !eslint.config.mjs
 !README.md
+
+# Authored content: Prettier rewrites prose and collapses code samples inside
+# fenced blocks, so blog posts stay out of the formatter's reach.
+/src/content/blog/
