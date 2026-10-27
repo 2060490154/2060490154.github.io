@@ -282,5 +282,5 @@ git push origin main
 
 * **内联全站 CSS（`build.inlineStylesheets: "always"`）**：A/B 实测 FCP 提前 76ms（消掉 152ms 渲染阻塞），但 LCP **反而晚 70ms**、传输量 +12KB（预取文档也被撑大），净收益为零 → 回退，保留 1 年 immutable 的外链 CSS。
 * **Speculation Rules 预渲染（`experimental.clientPrerender`）**：Astro 4 的 list 规则是 `immediate` eagerness，首页会一次性预渲染多篇文章；预渲染页会执行脚本，评论区的 IntersectionObserver 可能提前拉起 giscus（≈100KB 第三方资源）。收益（省一次 DOM 解析）小于风险 → 暂不开，后续可单独 A/B。
-* **关闭 Web Analytics 信标**：线上实测当前页面已不再注入 `beacon.min.js`，无需操作；若日后复现，在面板关掉即可（代价是失去唯一的真实用户数据源）。
+* **Web Analytics 信标（未关）**：`beacon.min.js`（10.2KB）由 Zone 级的 RUM 注入规则下发，API token 改不动规则（`is_paused`），只读 `curl` 也看不到——它是按浏览器导航注入的，必须用真实浏览器（如 Lighthouse）才能观察到。实测它 `type="module"` 延后执行、不阻塞渲染，Lighthouse 仍是 100 分。要关的话在面板 **Web Analytics → 对应站点 → 删除/暂停注入**，代价是失去目前唯一的真实用户数据源。
 

@@ -216,7 +216,7 @@
 | 项 | 状态 | 说明 |
 | :--- | :--- | :--- |
 | B1 内联全站 CSS | ❌ **A/B 后回退** | FCP −76ms，但 LCP +70ms、传输 +12KB，净收益为零 |
-| B2 关 Web Analytics 信标 | ✅ 线上已无注入 | 实测首页/文章页均不再出现 `beacon.min.js` |
+| B2 关 Web Analytics 信标 | ⏸ **未关** | 由 Zone 级 RUM 注入规则下发，token 无法暂停；`type="module"` 延后执行，不影响 LCP 与评分（10.2KB） |
 | B3 关邮箱混淆 | ✅ | 页面不再注入 `email-decode.min.js` |
 | B4 开 Smart Tiered Cache | ✅ | 边缘未命中改走上级层，不再直连 Pages 回源 |
 | B5 文章页 `max-age` 60→300 | ✅ | 回访者少一次 304 往返 |
