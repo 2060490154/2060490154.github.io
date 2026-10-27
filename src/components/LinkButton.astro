@@ -5,6 +5,8 @@ export interface Props {
   ariaLabel?: string;
   title?: string;
   disabled?: boolean;
+  /** "hover" | "viewport" | false — omit to disable prefetching. */
+  prefetch?: "hover" | "viewport" | false;
 }
 
 const {
@@ -13,6 +15,7 @@ const {
   ariaLabel,
   title,
   disabled = false,
+  prefetch,
 } = Astro.props;
 ---
 
@@ -28,6 +31,7 @@ const {
   ) : (
     <a
       {href}
+      data-astro-prefetch={prefetch}
       class:list={["group inline-block hover:text-skin-accent", className]}
       aria-label={ariaLabel}
       title={title}

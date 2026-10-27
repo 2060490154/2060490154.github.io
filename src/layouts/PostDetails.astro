@@ -132,6 +132,7 @@ const nextPost =
         prevPost && (
           <a
             href={`/posts/${prevPost.slug}`}
+            data-astro-prefetch="viewport"
             class="flex w-full gap-1 hover:opacity-75"
           >
             <svg
@@ -160,6 +161,7 @@ const nextPost =
         nextPost && (
           <a
             href={`/posts/${nextPost.slug}`}
+            data-astro-prefetch="viewport"
             class="flex w-full justify-end gap-1 text-right hover:opacity-75 sm:col-start-2"
           >
             <div>

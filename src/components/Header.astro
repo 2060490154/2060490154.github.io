@@ -56,17 +56,29 @@ const { activeNav } = Astro.props;
         </button>
         <ul id="menu-items" class="display-none sm:flex">
           <li>
-            <a href="/posts/" class={activeNav === "posts" ? "active" : ""}>
+            <a
+              href="/posts/"
+              data-astro-prefetch="hover"
+              class={activeNav === "posts" ? "active" : ""}
+            >
               Posts
             </a>
           </li>
           <li>
-            <a href="/tags/" class={activeNav === "tags" ? "active" : ""}>
+            <a
+              href="/tags/"
+              data-astro-prefetch="hover"
+              class={activeNav === "tags" ? "active" : ""}
+            >
               Tags
             </a>
           </li>
           <li>
-            <a href="/about/" class={activeNav === "about" ? "active" : ""}>
+            <a
+              href="/about/"
+              data-astro-prefetch="hover"
+              class={activeNav === "about" ? "active" : ""}
+            >
               About
             </a>
           </li>
@@ -78,6 +90,7 @@ const { activeNav } = Astro.props;
                   className={`focus-outline flex justify-center p-3 sm:p-1`}
                   ariaLabel="archives"
                   title="Archives"
+                  prefetch="hover"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -113,6 +126,7 @@ const { activeNav } = Astro.props;
               } flex`}
               ariaLabel="search"
               title="Search"
+              prefetch="hover"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

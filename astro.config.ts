@@ -12,10 +12,20 @@ import rehypeKatex from "rehype-katex";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
+  // Prefetch only what the visitor is actually likely to open: post cards and
+  // prev/next links carry `data-astro-prefetch="viewport"`; everything else is
+  // left alone. `prefetchAll` would fetch every link in the viewport (~66 KB on
+  // the home page) which is wasted on mobile data plans.
   prefetch: {
-    prefetchAll: true,
-    defaultStrategy: "viewport",
+    prefetchAll: false,
+    defaultStrategy: "hover",
   },
+  // Tried `build.inlineStylesheets: "always"` (2026-10-27): the render-blocking
+  // CSS hop (~152 ms wasted) disappears and FCP improves ~75 ms, but the extra
+  // ~7 KB of CSS inside every document — including every prefetched document —
+  // delays the LCP text paint by a similar amount (~70 ms) and grows total
+  // transfer by ~12 KB. Net change on LCP was zero, so the external 1-year
+  // immutable stylesheet stays.
   integrations: [
     tailwind({
       applyBaseStyles: false,
