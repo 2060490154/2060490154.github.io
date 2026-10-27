@@ -95,7 +95,7 @@ pnpm format:check  # Prettier 校验（Windows 上会因 CRLF 误报，见第六
 
   # 文章详情页 —— 内容稳定，边缘常驻 1 天
   /posts/:slug/
-    Cache-Control: public, max-age=60, s-maxage=86400, stale-while-revalidate=604800
+    Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
 
   # 独立页 / 订阅 / 元数据 —— 1 小时
   /about/
@@ -142,7 +142,7 @@ pnpm format:check  # Prettier 校验（Windows 上会因 CRLF 误报，见第六
 * **Brotli 极致压缩**：`开启`（比 Gzip 体积更小）。
 
 ### 4. 前端交互与加载提速
-* **Astro Prefetch 预加载**：在 `astro.config.ts` 中开启了 `prefetchAll: true, defaultStrategy: "viewport"`。链接进入视口即在后台静默拉取目标页（桌面与移动端均生效），点击时如同单页应用（SPA）瞬间切换。
+* **Astro Prefetch 分级预取（2026-10-27 起）**：`prefetchAll: false` + `defaultStrategy: "hover"`。只给"最可能被点"的链接挂 `data-astro-prefetch`：文章卡片（`Card.tsx`）与上一篇/下一篇用 `viewport`（进视口即拉，手机可用），导航栏 5 个链接用 `hover`（桌面悬停才拉）。原 `prefetchAll: true` 会在首屏页面一口气预取 8 个链接（≈66KB），对移动流量不友好。
 * **KaTeX 样式按需加载**：KaTeX CSS 与字体由 Vite 打包成本地 `_astro/` 资源（已移除 cdnjs 外链）。`PostDetails.astro` 用 `import katexCssHref from "katex/dist/katex.min.css?url"` 取资源地址，仅在正文含 `$...$` / `$$...$$` 时才插入 `<link>`。注意：Astro 会把组件里静态 `import` 的 CSS 提升到共享 chunk，所以「条件渲染一个承担 import 的组件」是无效的，必须走 `?url` 才能真正按文章拆包。实测无公式的文章页不再加载这 28KB。
 * **评论区零 React**：`src/components/Comments.astro` 使用 giscus 官方原生脚本，通过 IntersectionObserver 距离视口 600px 时才加载；文章页不再下载 135KB 的 React runtime。
 * **搜索页延迟水合**：`src/pages/search.astro` 的 `SearchBar` 用 `client:idle`（原 `client:load`），先把静态输入框交给浏览器，空闲时才下载 React runtime（135KB，Brotli 后约 40KB）。只有搜索页受影响。
@@ -251,3 +251,36 @@ git push origin main
   ```
   不再需要时请到面板 Revoke，并删除该文件。
 * **CSP 只做了"不碰脚本"的部分**：`script-src` 未设白名单，因为页面有内联主题脚本和 Astro 注入脚本，硬上需要每次构建重算 hash。当前配置已能防点击劫持、插件注入和 `<base>` 劫持。
+
+---
+
+## 九、 2026-10-27 性能优化记录（P0 轮）
+
+完整调研与方案矩阵见 [`PERF-RESEARCH.md`](./PERF-RESEARCH.md)。
+
+### 1. 已落地
+
+| 项 | 变更 | 位置 |
+| :--- | :--- | :--- |
+| 预取分级 | `prefetchAll: false` + `hover` 默认；卡片/上下篇 `viewport`，导航栏 `hover` | `astro.config.ts`、`Card.tsx`、`PostDetails.astro`、`Header.astro`、`LinkButton.astro`（新增 `prefetch` 属性） |
+| 文章页浏览器 TTL | `max-age=60` → `300`，回访者少一次 304 往返 | `public/_headers` |
+| Smart Tiered Cache | 边缘未命中时先取上级层，不再跨洋回源（免费计划可用） | Cloudflare 面板/API |
+| 邮箱混淆 | 关闭，页面不再注入 `email-decode.min.js` | Cloudflare Scrape Shield |
+
+### 2. 验证数据（本机 preview + Lighthouse 移动端模拟，基线 vs 上线版）
+
+| 页面 | 指标 | 基线 | 上线版 |
+| :--- | :--- | :--- | :--- |
+| 首页 | FCP / LCP | 1,055ms / 1,206ms | 1,054ms / 1,204ms |
+| 首页 | 请求数 / 传输量 | 10 / 45.2KB | 9 / 44.2KB |
+| 公式页 | FCP / LCP | 1,656ms / 1,656ms | 1,654ms / 1,654ms |
+| 公式页 | 请求数 / 传输量 | 13 / 112.3KB | 12 / 106.6KB |
+
+结论：页面层确实已到天花板（Perf 100/99 打满），本轮收益主要是**少一次预取请求、少 5.7KB 传输、冷启动更快、回访少一次往返**，实验室指标基本持平。
+
+### 3. 试过但回退/未做（有数据）
+
+* **内联全站 CSS（`build.inlineStylesheets: "always"`）**：A/B 实测 FCP 提前 76ms（消掉 152ms 渲染阻塞），但 LCP **反而晚 70ms**、传输量 +12KB（预取文档也被撑大），净收益为零 → 回退，保留 1 年 immutable 的外链 CSS。
+* **Speculation Rules 预渲染（`experimental.clientPrerender`）**：Astro 4 的 list 规则是 `immediate` eagerness，首页会一次性预渲染多篇文章；预渲染页会执行脚本，评论区的 IntersectionObserver 可能提前拉起 giscus（≈100KB 第三方资源）。收益（省一次 DOM 解析）小于风险 → 暂不开，后续可单独 A/B。
+* **关闭 Web Analytics 信标**：线上实测当前页面已不再注入 `beacon.min.js`，无需操作；若日后复现，在面板关掉即可（代价是失去唯一的真实用户数据源）。
+
