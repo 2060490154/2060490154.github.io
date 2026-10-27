@@ -267,6 +267,8 @@ git push origin main
 | Smart Tiered Cache | 边缘未命中时先取上级层，不再跨洋回源（免费计划可用） | Cloudflare 面板/API |
 | 邮箱混淆 | 关闭，页面不再注入 `email-decode.min.js` | Cloudflare Scrape Shield |
 | 评论区点击加载 | giscus 不再随视口自动加载，改为按钮触发；文章页 29 请求/153KB → **7 请求/26KB** | `src/components/Comments.astro` |
+| Always Use HTTPS | 开启，避免访客敲裸域名时先吃一次 `http → https` 的 301 往返 | Cloudflare 面板/API |
+| HTML 浏览器 TTL | 文章页 `60→3600`、列表页 `60→300`：回访者在窗口期内**零请求**，省掉一次 ~840ms 的跨境握手 | `public/_headers` |
 
 ### 2. 验证数据（本机 preview + Lighthouse 移动端模拟，基线 vs 上线版）
 
@@ -284,4 +286,43 @@ git push origin main
 * **内联全站 CSS（`build.inlineStylesheets: "always"`）**：A/B 实测 FCP 提前 76ms（消掉 152ms 渲染阻塞），但 LCP **反而晚 70ms**、传输量 +12KB（预取文档也被撑大），净收益为零 → 回退，保留 1 年 immutable 的外链 CSS。
 * **Speculation Rules 预渲染（`experimental.clientPrerender`）**：Astro 4 的 list 规则是 `immediate` eagerness，首页会一次性预渲染多篇文章；预渲染页会执行脚本，评论区的 IntersectionObserver 可能提前拉起 giscus（≈100KB 第三方资源）。收益（省一次 DOM 解析）小于风险 → 暂不开，后续可单独 A/B。
 * **Web Analytics 信标（未关）**：`beacon.min.js`（10.2KB）由 Zone 级的 RUM 注入规则下发，API token 改不动规则（`is_paused`），只读 `curl` 也看不到——它是按浏览器导航注入的，必须用真实浏览器（如 Lighthouse）才能观察到。实测它 `type="module"` 延后执行、不阻塞渲染，Lighthouse 仍是 100 分。要关的话在面板 **Web Analytics → 对应站点 → 删除/暂停注入**，代价是失去目前唯一的真实用户数据源。
+
+---
+
+## 十、 真实用户数据（Cloudflare RUM，2026-10-13 ~ 10-27）
+
+数据源：Cloudflare Web Analytics 的 GraphQL 数据集（`rumWebVitalsEventsAdaptiveGroups` / `rumPerformanceEventsAdaptiveGroups`），按国家聚合的 p75。
+
+### 1. 核心指标
+
+| 国家 | 样本 | TTFB p75 | FCP p75 | LCP p75 |
+| :--- | ---: | ---: | ---: | ---: |
+| 中国大陆 | 20 | **930 ms** | 1,512 ms | **1,516 ms** |
+| 日本 | 20 | 861 ms | 1,408 ms | 1,408 ms |
+
+### 2. TTFB 拆解（7 天）
+
+| 国家 | DNS p75 | TCP 建连 p75 | TLS 握手 p75 |
+| :--- | ---: | ---: | ---: |
+| 中国大陆 | 26 ms | **502 ms** | **342 ms** |
+| 日本 | 0 ms | 183 ms | 291 ms |
+| 美国 | 10 ms | 18 ms | 17 ms |
+
+### 3. 结论（重要）
+
+* 大陆访客的 930ms TTFB 里，**DNS 只占 26ms，TCP+TLS 占 844ms**，服务端响应几乎不花时间。
+* 也就是说：**任何页面级优化（内联、减字节、预取）都动不了这 844ms**，它由 CF 免费版从大陆到边缘节点的路由决定。
+* 好消息是 **LCP p75 = 1.5s，已经达到 Core Web Vitals「良好」标准（< 2.5s）**，不需要为此花钱。
+* 能免费改善的只有两处，都已在第九节落地：**让回访者少连一次**（HTML TTL 拉长、去掉多余第三方域名）、**让首次访问少跳一次**（Always Use HTTPS）。
+
+> 查询方式（令牌在 `C:\Users\Administrator\.cloudflare\api-token`）：
+> ```powershell
+> # GraphQL，按国家取 p75
+> $q = 'query { viewer { accounts(filter: {accountTag: "..."}) {
+>   rumWebVitalsEventsAdaptiveGroups(limit: 30, filter: {siteTag: "...", datetime_geq: "...", datetime_leq: "..."}) {
+>     count dimensions { countryName } quantiles { timeToFirstByteP75 largestContentfulPaintP75 }
+>   } } } }'
+> ```
+> 数据集：`rumWebVitalsEventsAdaptiveGroups`（LCP/FCP/TTFB/INP/CLS）、`rumPerformanceEventsAdaptiveGroups`（DNS/TCP/TLS 分段）。
+
 

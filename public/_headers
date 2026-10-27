@@ -27,34 +27,37 @@
   Cache-Control: public, max-age=86400, s-maxage=31536000
 
 # === Home & listing pages: new posts surface within ~10 min ===
+# Browser TTL 5 min. Repeat visits inside that window cost zero requests, which
+# matters because a fresh connection from China costs ~840 ms (TCP 500 + TLS 340).
 /
-  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=300, s-maxage=600, stale-while-revalidate=86400
 
 /posts/
-  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=300, s-maxage=600, stale-while-revalidate=86400
 
 /tags/*
-  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=300, s-maxage=600, stale-while-revalidate=86400
 
 /archives/
-  Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=300, s-maxage=600, stale-while-revalidate=86400
 
 # === Article pages: stable content, kept on the edge for a day ===
-# Browser TTL is 5min: a 60s TTL made every return visit fire a conditional
-# 304 round trip, which costs a full RTT on high-latency links for zero gain.
+# Browser TTL is 1 h. Measured on the live site: every return visit that misses
+# the browser cache pays a fresh TLS handshake (~840 ms p75 from China) + a 304.
+# Articles rarely change, and the edge copy (s-maxage) stays authoritative.
 /posts/:slug/
-  Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800
+  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800
 
 # === Standalone pages ===
 /about/
-  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400
 
 /search/
-  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400
 
 # === Feeds & metadata ===
 /rss.xml
-  Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
+  Cache-Control: public, max-age=600, s-maxage=3600, stale-while-revalidate=86400
 
 /robots.txt
   Cache-Control: public, max-age=60, s-maxage=3600, stale-while-revalidate=86400
