@@ -144,7 +144,7 @@ pnpm format:check  # Prettier 校验（Windows 上会因 CRLF 误报，见第六
 ### 4. 前端交互与加载提速
 * **Astro Prefetch 分级预取（2026-10-27 起）**：`prefetchAll: false` + `defaultStrategy: "hover"`。只给"最可能被点"的链接挂 `data-astro-prefetch`：文章卡片（`Card.tsx`）与上一篇/下一篇用 `viewport`（进视口即拉，手机可用），导航栏 5 个链接用 `hover`（桌面悬停才拉）。原 `prefetchAll: true` 会在首屏页面一口气预取 8 个链接（≈66KB），对移动流量不友好。
 * **KaTeX 样式按需加载**：KaTeX CSS 与字体由 Vite 打包成本地 `_astro/` 资源（已移除 cdnjs 外链）。`PostDetails.astro` 用 `import katexCssHref from "katex/dist/katex.min.css?url"` 取资源地址，仅在正文含 `$...$` / `$$...$$` 时才插入 `<link>`。注意：Astro 会把组件里静态 `import` 的 CSS 提升到共享 chunk，所以「条件渲染一个承担 import 的组件」是无效的，必须走 `?url` 才能真正按文章拆包。实测无公式的文章页不再加载这 28KB。
-* **评论区零 React**：`src/components/Comments.astro` 使用 giscus 官方原生脚本，通过 IntersectionObserver 距离视口 600px 时才加载；文章页不再下载 135KB 的 React runtime。
+* **评论区点击加载**：`src/components/Comments.astro` 使用 giscus 官方原生脚本（无 React）。默认只渲染一个「想说点什么？点击加载评论」按钮，**读者点了才注入 `giscus.app/client.js`**。实测文章页从 29 请求 / 153KB 降到 7 请求 / 26KB——挂载一次评论要拉 19 个 giscus 请求（98KB）+ 1 个 GitHub 头像动图（18KB），不点就一分不花。挂载后通过 MutationObserver 移除按钮，15 秒没出 iframe 则降级为「加载失败，点击重试」。
 * **搜索页延迟水合**：`src/pages/search.astro` 的 `SearchBar` 用 `client:idle`（原 `client:load`），先把静态输入框交给浏览器，空闲时才下载 React runtime（135KB，Brotli 后约 40KB）。只有搜索页受影响。
 * **主题脚本内联**：`toggle-theme.js` 已内联进 `src/layouts/Layout.astro` 的 `<head>`，消除每个页面一次额外请求（原 `public/toggle-theme.js` 已删除）。
 * **中文单字搜索优化**：在 `src/components/Search.tsx` 中将 Fuse.js 最低字符限制改为 1（`minMatchCharLength: 1`），完美解决中文单字（如“学”、“天”）搜不出结果的问题。
@@ -213,7 +213,7 @@ git push origin main
 | `tailwind.config.cjs` | 样式与原生跨平台系统字体栈配置 |
 | `src/layouts/Layout.astro` | 全站根 HTML 骨架、SEO 结构化数据、内联主题切换脚本 |
 | `src/layouts/PostDetails.astro` | 文章详情页模版、上一篇/下一篇导航、回到顶部、KaTeX 样式按需引入 |
-| `src/components/Comments.astro` | giscus 评论区（原生脚本 + 懒加载 + 主题同步，无 React） |
+| `src/components/Comments.astro` | giscus 评论区（原生脚本 + 点击加载 + 主题同步，无 React；不点不拉第三方资源） |
 | `src/components/Search.tsx` | 中文模糊搜索核心组件（Fuse.js） |
 | `src/pages/index.astro` | 博客主页布局（精选推荐、最新发布、关于作者） |
 | `.github/workflows/ci.yml` | 推送与 PR 触发：lint、format:check、build（pnpm 12 + `.node-version`） |
@@ -266,6 +266,7 @@ git push origin main
 | 文章页浏览器 TTL | `max-age=60` → `300`，回访者少一次 304 往返 | `public/_headers` |
 | Smart Tiered Cache | 边缘未命中时先取上级层，不再跨洋回源（免费计划可用） | Cloudflare 面板/API |
 | 邮箱混淆 | 关闭，页面不再注入 `email-decode.min.js` | Cloudflare Scrape Shield |
+| 评论区点击加载 | giscus 不再随视口自动加载，改为按钮触发；文章页 29 请求/153KB → **7 请求/26KB** | `src/components/Comments.astro` |
 
 ### 2. 验证数据（本机 preview + Lighthouse 移动端模拟，基线 vs 上线版）
 
