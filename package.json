@@ -8,6 +8,9 @@
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
+    "new": "node scripts/new-post.mjs",
+    "ship": "node scripts/publish.mjs",
+    "flush": "node scripts/flush-cache.mjs",
     "format:check": "prettier --check . --plugin=prettier-plugin-astro",
     "format": "prettier --write . --plugin=prettier-plugin-astro",
     "lint": "eslint ."

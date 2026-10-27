@@ -38,6 +38,9 @@ pnpm install       # 安装依赖（唯一锁文件 pnpm-lock.yaml）
 pnpm dev           # 本地启动开发服务器 (http://localhost:4321)
 pnpm build         # 本地生产打包 (输出至 dist/)
 pnpm preview       # 本地预览打包产物
+pnpm new "标题"     # 生成文章骨架（见第六节第 1 条）
+pnpm ship          # 提交 + 推送，触发 Cloudflare Pages 自动部署
+pnpm flush         # 清 Cloudflare 边缘缓存（改老文章后才需要）
 pnpm lint          # ESLint
 pnpm format:check  # Prettier 校验（Windows 上会因 CRLF 误报，见第六节）
 ```
@@ -191,12 +194,23 @@ pnpm format:check  # Prettier 校验（Windows 上会因 CRLF 误报，见第六
 
 ## 六、 部署发布与日常运维流程
 
-```bash
-# 1. 撰写新文章或修改代码后：
-git add .
-git commit -m "feat: 发布新文章-xxx"
-git push origin main
-```
+### 日常三条命令
+
+脚本放在 `scripts/`，纯 Node 原生实现（不新增依赖），Windows 与 Arch 都能跑：
+
+| 场景 | 命令 | 说明 |
+| :--- | :--- | :--- |
+| 写新文章 | `pnpm new "标题"` | 生成 `src/content/blog/标题.md`，frontmatter 已按 schema 填好；可加 `--tags 随笔,学习笔记`、`--desc "一句话简介"`、`--slug my-post`、`--featured`、`--draft` |
+| 发布 | `pnpm ship` | `git add -A` → commit（只改文章时自动写 `post: 更新文章 <时间>`）→ 与远端对齐 → push。`--check` 先本地打包，构建失败就不推；`--dry-run` 只汇报不落地 |
+| 改完老文章 | `pnpm flush` | 清 Cloudflare 边缘缓存（令牌沿用 `~/.cloudflare/api-token`，也可用环境变量 `CLOUDFLARE_API_TOKEN`）。发新文章**不需要**，新 URL 本来就没缓存 |
+
+* **分叉保护**：`pnpm ship` 发现本地与 `origin/main` 分叉会直接停下，让你先 `git pull --rebase`，绝不自动 merge 或 force push。
+* **别用 `pnpm purge`**：那是 pnpm 内置命令（`clean` 的别名，会删 `node_modules`），和清缓存无关，清缓存用 `pnpm flush`。
+* **手工等价流程**（脚本不可用时）：
+  ```bash
+  git add . && git commit -m "feat: 发布新文章-xxx" && git push origin main
+  ```
+
 * **自动发布**：GitHub 收到推送后，Cloudflare Pages 会在 15~30 秒内自动拉取代码并完成构建上线。
 * **推送即校验**：`.github/workflows/ci.yml` 在 **push 到 main** 和 PR 时都会跑 `lint` / `format:check` / `build`（Node 读 `.node-version`，pnpm 12 + `--frozen-lockfile`）。
   * **pnpm 版本必须 ≥10**：`pnpm-workspace.yaml` 里只有 `allowBuilds` 没有 `packages`，pnpm 9 会直接报 `ERROR packages field missing or empty`，整个 job 挂掉。
@@ -227,6 +241,7 @@ git push origin main
 | `.github/workflows/ci.yml` | 推送与 PR 触发：lint、format:check、build（pnpm 12 + `.node-version`） |
 | `.prettierignore` | 白名单式忽略：只检查代码与配置，`src/content/blog/` 正文豁免 |
 | `pnpm-workspace.yaml` | pnpm 10+ 的构建脚本白名单（`allowBuilds`: esbuild / sharp / workerd）；注意它**没有** `packages` 字段，低版本 pnpm 会因此报错 |
+| `scripts/*.mjs` | 三条日常命令的实现：`new-post`（生成文章骨架）/ `publish`（`pnpm ship`）/ `flush-cache`（`pnpm flush`） |
 
 ---
 
