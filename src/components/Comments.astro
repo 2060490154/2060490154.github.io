@@ -4,18 +4,38 @@ import { GISCUS } from "@config";
 
 <link rel="dns-prefetch" href="https://giscus.app" />
 
-<div id="giscus-wrapper" class="mt-8"></div>
+<div id="giscus-wrapper" class="mt-8">
+  <button
+    id="giscus-load"
+    type="button"
+    class="focus-outline group flex w-full items-center justify-center gap-2 rounded border border-dashed border-skin-line px-4 py-3 text-sm opacity-80 hover:opacity-100 hover:text-skin-accent"
+    aria-expanded="false"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      ><path
+        d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"></path>
+    </svg>
+    <span>想说点什么？点击加载评论</span>
+  </button>
+</div>
 
 <script is:inline data-astro-rerun define:vars={{ GISCUS }}>
-  /* Giscus comments loader
-   * - No React runtime: uses the official giscus client script directly
-   * - Lazy: only loads when the comment section approaches the viewport
+  /* Giscus comments loader (click to load)
+   * - No React runtime on the blog side: uses the official giscus client script
+   * - On demand: mounting the widget pulls ~116 KB of third-party assets
+   *   (giscus.app + GitHub avatars), so it only happens when the visitor asks
+   *   for it. Readers that never comment never pay for it.
    * - Syncs theme when the user toggles light/dark
    * - Re-initializes after Astro View Transitions navigations
    */
   (() => {
     const config = GISCUS;
     const containerId = "giscus-wrapper";
+    const buttonId = "giscus-load";
 
     function currentTheme() {
       const stored = localStorage.getItem("theme");
@@ -27,8 +47,34 @@ import { GISCUS } from "@config";
 
     function mountGiscus() {
       const container = document.getElementById(containerId);
+      const button = document.getElementById(buttonId);
       if (!container || container.dataset.giscusLoaded === "true") return;
       container.dataset.giscusLoaded = "true";
+
+      if (button) {
+        button.disabled = true;
+        button.setAttribute("aria-expanded", "true");
+        const label = button.querySelector("span");
+        if (label) label.textContent = "评论加载中…";
+
+        // Remove the placeholder as soon as the iframe is actually there, and
+        // restore it if giscus never shows up (blocked / offline).
+        const observer = new MutationObserver(() => {
+          if (container.querySelector("iframe.giscus-frame")) {
+            observer.disconnect();
+            button.remove();
+          }
+        });
+        observer.observe(container, { childList: true, subtree: true });
+        window.setTimeout(() => {
+          observer.disconnect();
+          if (!container.querySelector("iframe.giscus-frame") && label) {
+            label.textContent = "加载失败，点击重试";
+            button.disabled = false;
+            container.dataset.giscusLoaded = "false";
+          }
+        }, 15000);
+      }
 
       const script = document.createElement("script");
       script.src = "https://giscus.app/client.js";
@@ -51,24 +97,12 @@ import { GISCUS } from "@config";
 
     function setup() {
       const container = document.getElementById(containerId);
-      if (!container || container.dataset.giscusObserved === "true") return;
-      container.dataset.giscusObserved = "true";
-
-      if (!("IntersectionObserver" in window)) {
-        mountGiscus();
-        return;
-      }
-
-      const observer = new IntersectionObserver(
-        entries => {
-          if (entries.some(entry => entry.isIntersecting)) {
-            observer.disconnect();
-            mountGiscus();
-          }
-        },
-        { rootMargin: "600px 0px" }
-      );
-      observer.observe(container);
+      const button = document.getElementById(buttonId);
+      if (!container || !button) return;
+      if (container.dataset.giscusLoaded === "true") return;
+      if (button.dataset.giscusBound === "true") return;
+      button.dataset.giscusBound = "true";
+      button.addEventListener("click", mountGiscus);
     }
 
     function syncTheme() {
